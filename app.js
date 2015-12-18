@@ -3,7 +3,10 @@ var path = require('path');
 var mongoose = require('mongoose');
 var app = express();
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
+
+//res.cookie('user', 'uncha', {expires:new Date(Date.now() + 900000), path:'/'});
 
 /*************************** DB Connect ****************************/
 mongoose.connect('mongodb://uncha:rbxo6727@ds033175.mongolab.com:33175/mitte_underrange');
@@ -19,6 +22,7 @@ db.on('error', function(err){
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 /*************************** schema *******************************/
 var noticeSchema = mongoose.Schema({
@@ -26,6 +30,11 @@ var noticeSchema = mongoose.Schema({
 	content:{type:String},
 	view:{type:Number, default:1},
 	date:{type:Date, default:Date.now()}
+});
+
+var adminLoginSchema = mongoose.Schema({
+	admin_id:{type:String},
+	admin_password:{type:String}
 });
 
 /*************************** router *******************************/
@@ -50,7 +59,13 @@ app.get('/customer/notice/list', function(req, res){
 
 // notice Write
 app.get('/customer/notice/write', function(req, res){
-	res.render('board/default/write');
+	adminCheck(req, function(isAdmin){
+		if(isAdmin){
+			res.render('board/default/write');
+		} else {
+			res.redirect('/customer/admin/login');
+		}
+	});
 });
 
 // notice Write Process
@@ -99,7 +114,6 @@ app.post('/customer/notice/update/process/:id', urlencodedParser, function(req, 
 // notice View
 app.get('/customer/notice/view/:id', function(req, res){
 	var noticeModel = mongoose.model('notice', noticeSchema);
-
 	var id = req.params.id;
 
 	noticeModel.findOne({_id:id}).exec(function(err, data){
@@ -121,7 +135,28 @@ app.get('/customer/notice/delete/:id', function(req, res){
 	});
 });
 
+// notice login
+app.get('/customer/admin/login', function(req, res){
+	res.render('member/login');
+});
+
 /*************************** listen *******************************/
 app.listen(3000, function(){
 	console.log('Server on~!');
 });
+
+/*************************** util function *************************/
+function adminCheck(req, callback){
+	var adminLoginModel = mongoose.model('adminLogin', adminLoginSchema);
+	var isAdmin = false;
+
+	adminLoginModel.find({}).exec(function(err, data){
+		for(var i in data){
+			if(req.cookies.user == data[i].admin_id){
+				isAdmin = true;
+			}
+		}
+
+		callback(isAdmin);
+	});
+}

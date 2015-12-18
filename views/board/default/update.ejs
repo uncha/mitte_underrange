@@ -1,0 +1,22 @@
+<% include ../../partitials/header %>
+</head>
+<body>
+<% include ../../partitials/gnb %>
+<h1>Write</h1>
+<form class="form-horizontal" id="default_write_form" method="POST" action="/customer/notice/update/process/<%=data._id%>">
+    <div class="form-group">
+        <label class="col-sm-1 control-label">제목</label>
+        <div class="col-sm-11">
+            <input class="form-control" name="subject" type="text" value="<%=data.subject%>" placeholder="제목을 입력해 주세요.">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label">내용</label>
+        <div class="col-sm-11">
+            <textarea class="form-control" name="content" rows="3"><%=data.content%></textarea>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-default">전송</button>
+    <a class="btn btn-default" href="/customer/notice/list" role="button">목록</a>
+</form>
+<% include ../../partitials/footer %>

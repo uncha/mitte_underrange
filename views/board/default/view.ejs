@@ -24,8 +24,10 @@
     <dd><%= data.content%></dd>
 </dl>
 <div class="button-group">
+    <% if(isAdmin){%>
     <a class="btn btn-default" href="/customer/notice/update/<%=data._id%>" role="button">수정</a>
     <a class="btn btn-default" id="deleteBtn" href="/customer/notice/delete/<%=data._id%>" role="button">삭제</a>
+    <%}%>
     <a class="btn btn-default" href="/customer/notice/list" role="button">목록</a>
 </div>
 <% include ../../partitials/footer %>

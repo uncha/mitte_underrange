@@ -6,8 +6,6 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
 
-//res.cookie('user', 'uncha', {expires:new Date(Date.now() + 900000), path:'/'});
-
 /*************************** DB Connect ****************************/
 mongoose.connect('mongodb://uncha:rbxo6727@ds033175.mongolab.com:33175/mitte_underrange');
 var db = mongoose.connection;
@@ -50,10 +48,25 @@ app.get('/company/introduce', function(req, res){
 
 // notice List
 app.get('/customer/notice/list', function(req, res){
-	var noticeModel = mongoose.model('notice', noticeSchema);
+	res.redirect('/customer/notice/list/1');
+});
 
+// notice List
+app.get('/customer/notice/list/:currentPage', function(req, res){
+	var listSetting = {
+		listSize:10, // 한페이지에 보여질 목록 갯수 
+		pageSize:5 // 보여질 페이지 갯수
+	};
+	
+	var currentPage = req.params.currentPage;
+	var noticeModel = mongoose.model('notice', noticeSchema);
+	
 	noticeModel.find({}).sort({_id:-1}).exec(function(err, data){
-		res.render('board/default/list', {data:data});
+		var startList = data.length - listSetting.listSize * currentPage + 1;
+		var endList = data.length - listSetting.listSize * currentPage + listSetting.listSize;
+		if(startList < 1) startList = 1;
+		
+		res.render('board/default/list', {data:data, currentPage:currentPage, listSetting:listSetting});
 	});
 });
 
@@ -63,7 +76,7 @@ app.get('/customer/notice/write', function(req, res){
 		if(isAdmin){
 			res.render('board/default/write');
 		} else {
-			res.redirect('/customer/admin/login');
+			res.redirect('/customer/admin/login/customer-notice-write');
 		}
 	});
 });
@@ -88,10 +101,16 @@ app.post('/customer/notice/write/process', urlencodedParser, function(req, res){
 app.get('/customer/notice/update/:id', function(req, res){
 	var id = req.params.id;
 
-	var noticeModel = mongoose.model('notice', noticeSchema);
+	adminCheck(req, function(isAdmin){
+		if(isAdmin){
+			var noticeModel = mongoose.model('notice', noticeSchema);
 
-	noticeModel.findOne({_id:id}).exec(function(err, data){
-		res.render('board/default/update', {data:data});
+			noticeModel.findOne({_id:id}).exec(function(err, data){
+				res.render('board/default/update', {data:data});
+			});
+		} else {
+			res.redirect('/customer/admin/login/customer-notice-update-' + id);
+		}
 	});
 });
 
@@ -115,29 +134,62 @@ app.post('/customer/notice/update/process/:id', urlencodedParser, function(req, 
 app.get('/customer/notice/view/:id', function(req, res){
 	var noticeModel = mongoose.model('notice', noticeSchema);
 	var id = req.params.id;
-
-	noticeModel.findOne({_id:id}).exec(function(err, data){
-		var view = data.view++;
-		data.save(function(err){
-			res.render('board/default/view', {data:data});
+	
+	adminCheck(req, function(isAdmin){
+		noticeModel.findOne({_id:id}).exec(function(err, data){
+			var view = data.view++;
+			data.save(function(err){
+				res.render('board/default/view', {data:data, isAdmin:isAdmin});
+			});
 		});
 	});
 });
 
 // notice Delete
 app.get('/customer/notice/delete/:id', function(req, res){
-	var noticeModel = mongoose.model('notice', noticeSchema);
-
 	var id = req.params.id;
 
-	noticeModel.findByIdAndRemove(id, function(err){
-		res.redirect('/customer/notice/list');
+	adminCheck(req, function(isAdmin){
+		if(isAdmin){
+			var noticeModel = mongoose.model('notice', noticeSchema);
+
+			noticeModel.findByIdAndRemove(id, function(err){
+				res.redirect('/customer/notice/list');
+			});
+		} else {
+			res.redirect('/customer/admin/login/customer-notice-delete-' + id);
+		}
 	});
 });
 
-// notice login
-app.get('/customer/admin/login', function(req, res){
-	res.render('member/login');
+// notice Login
+app.get('/customer/admin/login/:redirect', function(req, res){
+	console.log(req.params.redirect);
+	res.render('member/login', {data:req.params.redirect});
+});
+
+// notice Login Process
+app.post('/customer/admin/login/process/:redirect', urlencodedParser, function(req, res){
+	var adminId = req.body.admin_id;
+	var adminPassword = req.body.admin_password;
+	var redicrtPage = '/' + req.params.redirect.split('-').join('/');
+
+	adminLoginModel = mongoose.model('adminLogin', adminLoginSchema);
+	
+	adminLoginModel.find({admin_id:adminId, admin_password:adminPassword}).exec(function(err, data){
+		if(!err){
+			if(data.length == 0){
+				var sendData = '<script type="text/javascript">';
+					sendData +=	'alert("아이디 또는 비밀번호를 확인해 주세요.");';
+					sendData +=	'history.back();';
+					sendData +=	'</script>';
+				res.send(sendData);
+			} else {
+				res.cookie('user', adminId, {expires:new Date(Date.now() + 900000), path:'/'});
+				res.redirect(redicrtPage);
+			}
+		}
+	});
 });
 
 /*************************** listen *******************************/

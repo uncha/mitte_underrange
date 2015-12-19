@@ -30,15 +30,43 @@
 	<a class="btn btn-default" href="/customer/notice/write" role="button">글작성</a>
 	<nav class="text-center">
 	  <ul class="pagination">
-	    <li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-	    <li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-	    <li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-	    <li><a href="#">2</a></li>
-	    <li><a href="#">3</a></li>
-	    <li><a href="#">4</a></li>
-	    <li><a href="#">5</a></li>
-	    <li><a href="#" aria-label="Next"><span aria-hidden="true">&laquo;</span></a></li>
-	    <li><a href="#" aria-label="Next"><span aria-hidden="true">&laquo;</span></a></li>
+	    <%
+	    	var listSize = listSetting.listSize; // 보여질 목록 갯수
+	    	var pageSize = listSetting.pageSize; // 보여질 페이지 갯수
+
+	       	var totalSize = data.length; // 전체 목록 갯수
+	       	var totalPage = Math.ceil(totalSize / listSize); // 전체 페이지 갯수
+	       	var totalPageGroupSize = Math.ceil(totalPage / pageSize);
+	       	var currentPageGroupNum = Math.ceil(currentPage / pageSize); // 현재 페이지 그룹 번호
+	       	var prevPageGroupNum = currentPageGroupNum - 1;
+	       	var nextPageGroupNum = currentPageGroupNum + 1;
+
+	       	var startPage = currentPageGroupNum * pageSize - pageSize + 1; // 보여질 시작 페이지
+	       	var endPage = currentPageGroupNum * pageSize; // 보여질 끝 페이지
+	       	if(endPage > totalPage) endPage = totalPage; // 마지막 페이지 보다 보여질 끝 페이지가 크다면 변경
+	    %>
+
+	    <%
+	    	if(prevPageGroupNum > 0){
+				var prevPage = prevPageGroupNum * pageSize - pageSize + 1;
+	    %>
+	    <li><a href="/customer/notice/list/1" aria-label="first"><span aria-hidden="true">&laquo;</span></a></li>
+	    <li><a href="/customer/notice/list/<%=prevPage%>" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a></li>
+	    <%}%>
+	    
+	    <% for(var i=startPage; i<=endPage; i++){%>
+	    <li <% if(i==currentPage){%>class="active"<%}%>><a href="/customer/notice/list/<%=i%>"><%=i%></a></li>
+	    <%}%>
+
+	    <%
+	    	if(nextPageGroupNum <= totalPageGroupSize){
+	    		var nextPage = nextPageGroupNum * pageSize - pageSize + 1;
+	    		if(nextPage > totalPage) nextPage = totalPage;
+	    %>
+	    <li><a href="/customer/notice/list/<%=nextPage%>" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a></li>
+	    <li><a href="/customer/notice/list/<%=totalPage%>" aria-label="last"><span aria-hidden="true">&raquo;</span></a></li>
+	    <%}%>
+
 	  </ul>
 	</nav>
 <% include ../../partitials/footer %>

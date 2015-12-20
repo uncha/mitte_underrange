@@ -51,22 +51,49 @@ app.get('/customer/notice/list', function(req, res){
 	res.redirect('/customer/notice/list/1');
 });
 
+// notice List Search
+app.post('/customer/notice/list/:currentPage/search', urlencodedParser, function(req, res){
+	res.redirect('/customer/notice/list/1/' + req.body.search_input);
+});
+
+var listSetting = {
+	listSize:10, // 한페이지에 보여질 목록 갯수 
+	pageSize:5 // 보여질 페이지 갯수
+};
+
+app.get('/customer/notice/list/:currentPage/:search', function(req, res){
+	var currentPage = req.params.currentPage;
+	var searchValue = req.params.search;
+	var noticeModel = mongoose.model('notice', noticeSchema);
+	var skipSize = (currentPage - 1) * listSetting.listSize;
+	var limitSize = listSetting.listSize;
+
+	noticeModel.count({}, function(err, c){
+		noticeModel.find({subject:searchValue}).skip(skipSize).limit(limitSize).sort({_id:-1}).exec(function(err, data){
+			var startList = data.length - listSetting.listSize * currentPage + 1;
+			var endList = data.length - listSetting.listSize * currentPage + listSetting.listSize;
+			if(startList < 1) startList = 1;
+			
+			res.render('board/default/list', {data:data, totalCount:data.length, currentPage:currentPage, listSetting:listSetting});
+		});
+	});
+});
+
 // notice List
 app.get('/customer/notice/list/:currentPage', function(req, res){
-	var listSetting = {
-		listSize:10, // 한페이지에 보여질 목록 갯수 
-		pageSize:5 // 보여질 페이지 갯수
-	};
-	
 	var currentPage = req.params.currentPage;
 	var noticeModel = mongoose.model('notice', noticeSchema);
-	
-	noticeModel.find({}).sort({_id:-1}).exec(function(err, data){
-		var startList = data.length - listSetting.listSize * currentPage + 1;
-		var endList = data.length - listSetting.listSize * currentPage + listSetting.listSize;
-		if(startList < 1) startList = 1;
-		
-		res.render('board/default/list', {data:data, currentPage:currentPage, listSetting:listSetting});
+	var skipSize = (currentPage - 1) * listSetting.listSize;
+	var limitSize = listSetting.listSize;
+
+	noticeModel.count({}, function(err, c){
+		noticeModel.find().skip(skipSize).limit(limitSize).sort({_id:-1}).exec(function(err, data){
+			var startList = data.length - listSetting.listSize * currentPage + 1;
+			var endList = data.length - listSetting.listSize * currentPage + listSetting.listSize;
+			if(startList < 1) startList = 1;
+			
+			res.render('board/default/list', {data:data, totalCount:c, currentPage:currentPage, listSetting:listSetting});
+		});
 	});
 });
 
@@ -185,7 +212,7 @@ app.post('/customer/admin/login/process/:redirect', urlencodedParser, function(r
 					sendData +=	'</script>';
 				res.send(sendData);
 			} else {
-				res.cookie('user', adminId, {expires:new Date(Date.now() + 900000), path:'/'});
+				res.cookie('user', adminId, {path:'/'});
 				res.redirect(redicrtPage);
 			}
 		}

@@ -3,7 +3,7 @@
 <body>
 <% include ../../partitials/gnb %>
 	<h1>Notice</h1>
-	<span>Total : <%=data.length%></span>
+	<span>Total : <%=totalCount%></span>
 	<table class="board table">
 		<colgroup>
 			<col />
@@ -27,14 +27,20 @@
 			<% })%>
 		</tbody>
 	</table>
-	<a class="btn btn-default" href="/customer/notice/write" role="button">글작성</a>
+	<form id="search_form" name="search_form" method="post" class="form-inline text-right" action="/customer/notice/list/1/search">
+		<div class="form-group">
+			<input type="text" name="search_input" class="form-control" style="width:300px">
+			<button type="submit" class="btn btn-default">검색</button>
+			<a class="btn btn-default" href="/customer/notice/write" role="button">글작성</a>
+		</div>
+	</form>
 	<nav class="text-center">
 	  <ul class="pagination">
 	    <%
 	    	var listSize = listSetting.listSize; // 보여질 목록 갯수
 	    	var pageSize = listSetting.pageSize; // 보여질 페이지 갯수
-
-	       	var totalSize = data.length; // 전체 목록 갯수
+    		
+	       	var totalSize = totalCount; // 전체 목록 갯수
 	       	var totalPage = Math.ceil(totalSize / listSize); // 전체 페이지 갯수
 	       	var totalPageGroupSize = Math.ceil(totalPage / pageSize);
 	       	var currentPageGroupNum = Math.ceil(currentPage / pageSize); // 현재 페이지 그룹 번호

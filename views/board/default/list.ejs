@@ -34,28 +34,28 @@
 	</table>
 	<form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/customer/notice/list/1">
 		<div class="form-group">
-			<input type="text" name="search" class="form-control" style="width:200px" value="<%=searchValue%>">
+			<input type="text" name="search" class="search-input form-control" style="width:200px" value="<%=searchValue%>">
 			<button type="submit" class="btn btn-default">검색</button>
 			<a class="btn btn-default" href="/customer/notice/write" role="button">글작성</a>
 		</div>
 	</form>
 	<nav class="text-center">
-	  <ul class="pagination">
+		<ul class="pagination">
 	    <%
-	    	var listSize = listSetting.listSize; // 보여질 목록 갯수
-	    	var pageSize = listSetting.pageSize; // 보여질 페이지 갯수
+			var listSize = listSetting.listSize; // 보여질 목록 갯수
+			var pageSize = listSetting.pageSize; // 보여질 페이지 갯수
 
-	       	var totalSize = totalCount; // 전체 목록 갯수
-	       	var totalPage = Math.ceil(totalSize / listSize); // 전체 페이지 갯수
-	       	var totalPageGroupSize = Math.ceil(totalPage / pageSize);
-	       	var currentPageGroupNum = Math.ceil(currentPage / pageSize); // 현재 페이지 그룹 번호
-	       	var prevPageGroupNum = currentPageGroupNum - 1;
-	       	var nextPageGroupNum = currentPageGroupNum + 1;
+			var totalSize = totalCount; // 전체 목록 갯수
+			var totalPage = Math.ceil(totalSize / listSize); // 전체 페이지 갯수
+			var totalPageGroupSize = Math.ceil(totalPage / pageSize);
+			var currentPageGroupNum = Math.ceil(currentPage / pageSize); // 현재 페이지 그룹 번호
+			var prevPageGroupNum = currentPageGroupNum - 1;
+			var nextPageGroupNum = currentPageGroupNum + 1;
 
-	       	var startPage = currentPageGroupNum * pageSize - pageSize + 1; // 보여질 시작 페이지
-	       	var endPage = currentPageGroupNum * pageSize; // 보여질 끝 페이지
-	       	if(endPage > totalPage) endPage = totalPage; // 마지막 페이지 보다 보여질 끝 페이지가 크다면 변경
-	    %>
+			var startPage = currentPageGroupNum * pageSize - pageSize + 1; // 보여질 시작 페이지
+			var endPage = currentPageGroupNum * pageSize; // 보여질 끝 페이지
+			if(endPage > totalPage) endPage = totalPage; // 마지막 페이지 보다 보여질 끝 페이지가 크다면 변경
+		%>
 
 	    <%
 	    	if(prevPageGroupNum > 0){

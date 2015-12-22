@@ -23,6 +23,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 /*************************** schema *******************************/
+// type String, Number, Date, Buffer, Boolean, Mixed, ObjectId, Array
+
 var noticeSchema = mongoose.Schema({
 	subject:{type:String},
 	content:{type:String},
@@ -33,6 +35,18 @@ var noticeSchema = mongoose.Schema({
 var adminLoginSchema = mongoose.Schema({
 	admin_id:{type:String},
 	admin_password:{type:String}
+});
+
+var memberSchema = mongoose.Schema({
+	user_id:{type:String},
+	password:{type:String},
+	name:{type:String},
+	email:{type:String},
+	birth:Date,
+	sex:String,
+	phone:Array,
+	sendEmail:Boolean,
+	sendSMS:Boolean
 });
 
 /*************************** router *******************************/
@@ -46,6 +60,34 @@ app.get('/company/introduce', function(req, res){
 	res.render('company/introduce');
 });
 
+// ------------------------ member -------------------------------//
+// Login
+app.get('/customer/admin/login/:redirect', function(req, res){
+	res.render('member/login', {data:req.params.redirect});
+});
+
+app.get('/member/register', function(req, res){
+	res.render('member/register');
+});
+
+app.post('/member/register_form', urlencodedParser, function(req, res){
+	if(!req.body.check1 || !req.body.check2){
+		var sendData = sendAndBack('회원가입약관과 개인정보취급방침을 읽고 동의해 주셔야 회원가입하실 수 있습니다.');
+		res.send(sendData);
+	} else {
+		res.render('member/register_form');
+	}
+});
+
+app.post('/member/register/process', urlencodedParser, function(req, res){
+	memberModel = mongoose.model('member', memberSchema);
+
+	memberModel.create(req.body, function(err, data){
+		console.log(data);
+	});
+});
+
+// ------------------------ board -------------------------------//
 // notice List
 app.get('/customer/notice/list', function(req, res){
 	res.redirect('/customer/notice/list/1');
@@ -169,12 +211,6 @@ app.get('/customer/notice/delete/:id', function(req, res){
 	});
 });
 
-// notice Login
-app.get('/customer/admin/login/:redirect', function(req, res){
-	console.log(req.params.redirect);
-	res.render('member/login', {data:req.params.redirect});
-});
-
 // notice Login Process
 app.post('/customer/admin/login/process/:redirect', urlencodedParser, function(req, res){
 	var adminId = req.body.admin_id;
@@ -186,10 +222,7 @@ app.post('/customer/admin/login/process/:redirect', urlencodedParser, function(r
 	adminLoginModel.find({admin_id:adminId, admin_password:adminPassword}).exec(function(err, data){
 		if(!err){
 			if(data.length == 0){
-				var sendData = '<script type="text/javascript">';
-					sendData +=	'alert("아이디 또는 비밀번호를 확인해 주세요.");';
-					sendData +=	'history.back();';
-					sendData +=	'</script>';
+				var sendData = sendAndBack('아이디 또는 비밀번호를 확인해 주세요.');
 				res.send(sendData);
 			} else {
 				res.cookie('user', adminId, {path:'/'});
@@ -218,4 +251,13 @@ function adminCheck(req, callback){
 
 		callback(isAdmin);
 	});
+}
+
+function sendAndBack(msg){
+	var sendData = '<script type="text/javascript">';
+	sendData +=	'alert("' + msg + '");';
+	sendData +=	'history.back();';
+	sendData +=	'</script>';
+
+	return sendData;
 }

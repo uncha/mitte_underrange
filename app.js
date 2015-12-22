@@ -23,7 +23,23 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 /*************************** schema *******************************/
-// type String, Number, Date, Buffer, Boolean, Mixed, ObjectId, Array
+	// type : String, Number, Date, Buffer, Boolean, Mixed, ObjectId, Array
+
+var boardSetting = {
+	default:{listSize:10,pageSize:5,reply:true,comment:true,login:false,admin:false},
+	notice:{reply:false,comment:false,login:false,admin:true}
+};
+
+var boardSchema = mongoose.Schema({
+	reply_id:{type:objectId},
+	subject:{type:String},
+	content:{type:String},
+	writer:{type:String},
+	password:{type:String},
+	hits:{type:Number, default:1},
+	user_id:{type:objectId},
+	createAt:{type:Date, default:Date.now()}
+});
 
 var noticeSchema = mongoose.Schema({
 	subject:{type:String},
@@ -183,7 +199,7 @@ app.post('/customer/notice/update/process/:id', urlencodedParser, function(req, 
 app.get('/customer/notice/view/:id', function(req, res){
 	var noticeModel = mongoose.model('notice', noticeSchema);
 	var id = req.params.id;
-	
+
 	adminCheck(req, function(isAdmin){
 		noticeModel.findOne({_id:id}).exec(function(err, data){
 			var view = data.view++;
@@ -245,9 +261,9 @@ function adminCheck(req, callback){
 	adminLoginModel.find({}).exec(function(err, data){
 		for(var i in data){
 			if(req.cookies.user == data[i].admin_id){
-				isAdmin = true;
-			}
+			isAdmin = true;
 		}
+	}
 
 		callback(isAdmin);
 	});

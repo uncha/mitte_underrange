@@ -25,22 +25,24 @@ app.use(cookieParser());
 /*************************** schema *******************************/
 	// type : String, Number, Date, Buffer, Boolean, Mixed, ObjectId, Array
 
-var boardSetting = {
-	default:{listSize:10,pageSize:5,reply:true,comment:true,login:false,admin:false},
-	notice:{reply:false,comment:false,login:false,admin:true}
-};
-
 var boardSchema = mongoose.Schema({
-	reply_id:{type:objectId},
+	// default field(수정 금지)
+	parent:{type:String},
+	step:{type:Number, default:0},
+	depth:{type:Number, default:0},
+	comment:{type:String},
 	subject:{type:String},
 	content:{type:String},
 	writer:{type:String},
 	password:{type:String},
-	hits:{type:Number, default:1},
-	user_id:{type:objectId},
-	createAt:{type:Date, default:Date.now()}
+	hits:{type:Number, default:0},
+	user_id:{type:String},
+	createAt:{type:Date, default:Date.now()},
+	// add field
+	field1:{type:String}
 });
 
+/*
 var noticeSchema = mongoose.Schema({
 	subject:{type:String},
 	content:{type:String},
@@ -63,9 +65,9 @@ var memberSchema = mongoose.Schema({
 	phone:Array,
 	sendEmail:Boolean,
 	sendSMS:Boolean
-});
+});*/
 
-/*************************** router *******************************/
+/*************************** custom router *******************************/
 // root
 app.get('/', function(req, res){
 	res.render('index');
@@ -76,8 +78,9 @@ app.get('/company/introduce', function(req, res){
 	res.render('company/introduce');
 });
 
+/*************************** basic router *******************************/
 // ------------------------ member -------------------------------//
-// Login
+/*// Login
 app.get('/customer/admin/login/:redirect', function(req, res){
 	res.render('member/login', {data:req.params.redirect});
 });
@@ -101,152 +104,203 @@ app.post('/member/register/process', urlencodedParser, function(req, res){
 	memberModel.create(req.body, function(err, data){
 		console.log(data);
 	});
-});
+});*/
 
 // ------------------------ board -------------------------------//
-// notice List
-app.get('/customer/notice/list', function(req, res){
-	res.redirect('/customer/notice/list/1');
+/*
+ *
+ * 게시판 생성시 boardSetting에 카테고리를 추가한뒤 views/board/카테고리 폴더를 생성한뒤 게시판 파일을 복사해야 합니다.
+ * boardSetting에 추가된 카테고리를 작성해 줍니다.
+ *
+ */
+var boardSetting = {
+	// default setting(수정금지)
+	default:{listSize:10, pageSize:5, reply:true, comment:true, login:false, admin:false},
+	// add category(* 반드시 collection 정보를 입력해 주어야 함)
+	notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
+	qna:{collection:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true}
+};
+
+// list
+app.get('/board/:category/list', function(req, res){
+	var category = req.params.category;
+	res.redirect('/board/' + category + '/list/1');
 });
 
-// notice List
-app.get('/customer/notice/list/:currentPage', function(req, res){
-	var listSetting = {
-		listSize:10, // 한페이지에 보여질 목록 갯수
-		pageSize:5 // 보여질 페이지 갯수
-	};
-
+app.get('/board/:category/list/:currentPage', function(req, res){
+	var category = req.params.category;
 	var currentPage = req.params.currentPage;
-	var noticeModel = mongoose.model('notice', noticeSchema);
-	var skipSize = (currentPage - 1) * listSetting.listSize;
-	var limitSize = listSetting.listSize;
 	var searchValue = req.query.search;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
+	var skipSize = (currentPage - 1) * setting.listSize;
+	var limitSize = setting.listSize;
 	var searchQuery = {};
-	if(searchValue) searchQuery.subject = new RegExp(searchValue,"gi");
 
-	noticeModel.count(searchQuery, function(err, c){
-		noticeModel.find(searchQuery).skip(skipSize).limit(limitSize).sort({_id:-1}).exec(function(err, data){
-			var startList = data.length - listSetting.listSize * currentPage + 1;
-			var endList = data.length - listSetting.listSize * currentPage + listSetting.listSize;
+	boardModel.count(searchQuery, function(err, c){
+		boardModel.find(searchQuery).skip(skipSize).limit(limitSize).sort({parent:-1, step:1}).exec(function(err, data){
+			var startList = data.length - setting.listSize * currentPage + 1;
+			var endList = data.length - setting.listSize * currentPage + setting.listSize;
 			if(startList < 1) startList = 1;
 
-			res.render('board/default/list', {data:data, totalCount:c, currentPage:currentPage, searchValue:searchValue, listSetting:listSetting});
+			res.render('board/' + category + '/list', {data:data, category:category, totalCount:c, currentPage:currentPage, searchValue:searchValue, setting:setting});
 		});
 	});
 });
 
-// notice Write
-app.get('/customer/notice/write', function(req, res){
-	adminCheck(req, function(isAdmin){
-		if(isAdmin){
-			res.render('board/default/write');
-		} else {
-			res.redirect('/customer/admin/login/customer-notice-write');
-		}
-	});
+// write
+app.get('/board/:category/write', function(req, res){
+	var category = req.params.category;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+
+	res.render('board/' + category + '/write', {category:category, setting:setting});
 });
 
-// notice Write Process
-app.post('/customer/notice/write/process', urlencodedParser, function(req, res){
-	var noticeModel = mongoose.model('notice', noticeSchema);
+// write_process
+app.post('/board/:category/write_process', urlencodedParser, function(req, res){
+	var category = req.params.category;
+	var data = req.body;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
 
-	var data = {subject:req.body.subject, content:req.body.content};
-
-	noticeModel.create(data, function(err, data){
-		if(err){
-			console.log('Error', err);
-		} else {
-			console.log('Create Success', data);
-			res.redirect('/customer/notice/list');
-		}
-	});
-});
-
-// notice Update
-app.get('/customer/notice/update/:id', function(req, res){
-	var id = req.params.id;
-
-	adminCheck(req, function(isAdmin){
-		if(isAdmin){
-			var noticeModel = mongoose.model('notice', noticeSchema);
-
-			noticeModel.findOne({_id:id}).exec(function(err, data){
-				res.render('board/default/update', {data:data});
-			});
-		} else {
-			res.redirect('/customer/admin/login/customer-notice-update-' + id);
-		}
-	});
-});
-
-// notice Update Process
-app.post('/customer/notice/update/process/:id', urlencodedParser, function(req, res){
-	var noticeModel = mongoose.model('notice', noticeSchema);
-
-	var id = req.params.id;
-
-	noticeModel.findOne({_id:id}).exec(function(err, data){
-		data.subject = req.body.subject;
-		data.content = req.body.content;
-
+	boardModel.create(data, function(err, data){
+		data.parent = data._id;
 		data.save(function(err){
-			res.redirect('/customer/notice/list');
+			res.redirect('/board/' + category + '/view/' + data._id);
 		});
 	});
 });
 
-// notice View
-app.get('/customer/notice/view/:id', function(req, res){
-	var noticeModel = mongoose.model('notice', noticeSchema);
+// view
+app.get('/board/:category/view/:id', function(req, res){
+	var category = req.params.category;
 	var id = req.params.id;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
 
-	adminCheck(req, function(isAdmin){
-		noticeModel.findOne({_id:id}).exec(function(err, data){
-			var view = data.view++;
-			data.save(function(err){
-				res.render('board/default/view', {data:data, isAdmin:isAdmin});
-			});
+	boardModel.findOne({_id:id}, function(err, data){
+		data.hits++;
+		data.save(function(err){
+			res.render('board/' + category + '/view', {data:data, category:category, setting:setting});
 		});
 	});
 });
 
-// notice Delete
-app.get('/customer/notice/delete/:id', function(req, res){
+// update
+app.get('/board/:category/update/:id', function(req, res){
+	var category = req.params.category;
 	var id = req.params.id;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
 
-	adminCheck(req, function(isAdmin){
-		if(isAdmin){
-			var noticeModel = mongoose.model('notice', noticeSchema);
-
-			noticeModel.findByIdAndRemove(id, function(err){
-				res.redirect('/customer/notice/list');
-			});
-		} else {
-			res.redirect('/customer/admin/login/customer-notice-delete-' + id);
-		}
+	boardModel.findOne({_id:id}, function(err, data){
+		res.render('board/' + category + '/update', {data:data, category:category, setting:setting});
 	});
 });
 
-// notice Login Process
-app.post('/customer/admin/login/process/:redirect', urlencodedParser, function(req, res){
-	var adminId = req.body.admin_id;
-	var adminPassword = req.body.admin_password;
-	var redicrtPage = '/' + req.params.redirect.split('-').join('/');
+// update_process
+app.post('/board/:category/update_process/:id', urlencodedParser, function(req, res){
+	var category = req.params.category;
+	var id = req.params.id;
+	var data = req.body;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
 
-	adminLoginModel = mongoose.model('adminLogin', adminLoginSchema);
-	
-	adminLoginModel.find({admin_id:adminId, admin_password:adminPassword}).exec(function(err, data){
-		if(!err){
-			if(data.length == 0){
-				var sendData = sendAndBack('아이디 또는 비밀번호를 확인해 주세요.');
-				res.send(sendData);
-			} else {
-				res.cookie('user', adminId, {path:'/'});
-				res.redirect(redicrtPage);
+	boardModel.findOne({_id:id}, function(err, originData){
+		var updateData = extend(originData, data);
+
+		updateData.save(function(err){
+			res.redirect('/board/' + category + '/view/' + id);
+		});
+	});
+});
+
+// delete_process
+
+// reply
+app.get('/board/:category/reply/:id', function(req, res){
+	var category = req.params.category;
+	var id = req.params.id;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+	var boardModel = mongoose.model(collection, boardSchema);
+
+	boardModel.findOne({_id:id}, function(err, data){
+		res.render('board/' + collection + '/reply', {data:data, category:category, setting:setting});
+	});
+});
+
+// reply_process
+app.post('/board/:category/reply_process/:id', urlencodedParser, function(req, res){
+	var category = req.params.category;
+	var replyId = req.params.id;
+	var data = req.body;
+	var collection = boardSetting[category].collection;
+	var setting = extend(boardSetting.default, boardSetting[category] || {});
+
+	var boardModel = mongoose.model(collection, boardSchema);
+	boardModel.findOne({_id:replyId}, function(err, replyData){
+		var parent = replyData.parent;
+		var depth = replyData.depth + 1;
+		var step = replyData.step + 1;
+		
+		boardModel.find({parent:replyId, step:{$gt:replyData.step}}).exec(function(err, db){
+			data.parent = parent;
+			data.depth = depth;
+			data.step = step;
+
+			for(var i=0; i<db.length; i++){
+				db[i].step++;
+				db[i].save();
 			}
-		}
+
+			boardModel.create(data, function(err, data){
+				console.log(data);
+			});
+		});
 	});
 });
+
+// comment_process
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*************************** listen *******************************/
 app.listen(3000, function(){
@@ -260,10 +314,10 @@ function adminCheck(req, callback){
 
 	adminLoginModel.find({}).exec(function(err, data){
 		for(var i in data){
-			if(req.cookies.user == data[i].admin_id){
-			isAdmin = true;
+				if(req.cookies.user == data[i].admin_id){
+				isAdmin = true;
+			}
 		}
-	}
 
 		callback(isAdmin);
 	});
@@ -276,4 +330,11 @@ function sendAndBack(msg){
 	sendData +=	'</script>';
 
 	return sendData;
+}
+
+function extend(obj, src) {
+	for (var key in src) {
+		if (src.hasOwnProperty(key)) obj[key] = src[key];
+	}
+	return obj;
 }

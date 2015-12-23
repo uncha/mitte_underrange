@@ -1,0 +1,36 @@
+<% include ../../partitials/header %>
+<script>
+    $(function(){
+        $('#deleteBtn').click(function(e){
+            e.preventDefault();
+
+            var result = confirm('삭제하시겠습니까?');
+            if(result) location.href = $(this).attr('href');
+        });
+    });
+</script>
+</head>
+<body>
+<% include ../../partitials/gnb %>
+<h1>View</h1>
+<dl class="notice-view dl-horizontal">
+    <dt>제목</dt>
+    <dd><%= data.subject%></dd>
+    <dt>조회수</dt>
+    <dd><%= data.hits%></dd>
+    <dt>작성자</dt>
+    <dd><%= data.writer%></dd>
+    <dt>이메일</dt>
+    <dd><%= data.field1%></dd>
+    <dt>작성일</dt>
+    <dd><% var date = data.createAt%><% include ../../partitials_util/date_format %></dd>
+    <dt>내용</dt>
+    <dd><%= data.content%></dd>
+</dl>
+<div class="button-group">
+    <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
+    <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
+    <a class="btn btn-default" href="/board/<%=category%>/list" role="button">목록</a>
+    <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
+</div>
+<% include ../../partitials/footer %>

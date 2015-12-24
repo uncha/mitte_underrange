@@ -80,7 +80,8 @@ app.get('/company/introduce', function(req, res){
 
 /*************************** basic router *******************************/
 // ------------------------ member -------------------------------//
-/*// Login
+/*
+// Login
 app.get('/customer/admin/login/:redirect', function(req, res){
 	res.render('member/login', {data:req.params.redirect});
 });
@@ -248,8 +249,8 @@ app.post('/board/:category/reply_process/:id', urlencodedParser, function(req, r
 		var parent = replyData.parent;
 		var depth = replyData.depth + 1;
 		var step = replyData.step + 1;
-		
-		boardModel.find({parent:replyId, step:{$gt:replyData.step}}).exec(function(err, db){
+
+		boardModel.find({parent:replyData.parent, step:{$gt:replyData.step}}).exec(function(err, db){
 			data.parent = parent;
 			data.depth = depth;
 			data.step = step;
@@ -260,7 +261,7 @@ app.post('/board/:category/reply_process/:id', urlencodedParser, function(req, r
 			}
 
 			boardModel.create(data, function(err, data){
-				console.log(data);
+				res.redirect('/board/' + category + '/view/' + data.id);
 			});
 		});
 	});

@@ -4,15 +4,20 @@
 <% include ../../partitials/gnb %>
 <h1><%=setting.subject%></h1>
 <span>Total : <%=totalCount%></span>
+<!-- list -->
 <table class="board table">
     <colgroup>
+        <col style="width:70px"/>
         <col />
+        <col style="width:120px" />
         <col style="width:60px" />
-        <col style="width:100px" />
+        <col style="width:120px" />
     </colgroup>
     <thead>
     <tr>
+        <th class="text-center">번호</th>
         <th class="text-center">제목</th>
+        <th class="text-center">작성자</th>
         <th class="text-center">조회수</th>
         <th class="text-center">작성일</th>
     </tr>
@@ -23,15 +28,39 @@
         <td class="text-center" colspan="3"><h5>등록된 게시물이 없습니다.</h5></td>
     </tr>
     <%}%>
-    <% data.forEach(function(e){%>
+    <%
+        var cnt = totalCount - currentPage * setting.listSize + setting.listSize;
+        data.forEach(function(e){
+    %>
     <tr>
-        <td><a href="/board/<%=category%>/view/<%=e._id%>"><%=e.subject%></a></td>
+        <td class="text-center"><%=cnt%></td>
+        <td>
+            <%
+                if(e.depth > 0){
+                var margin = e.depth * 15;
+            %>
+            <img style="width:10px; margin:0 5px 0 <%=margin%>px" src="/images/board/reply_icon.png" />
+            <% } %>
+            <a style="vertical-align: text-top" href="/board/<%=category%>/view/<%=e._id%>"><%=e.subject%></a>
+
+            <%
+                var betweenTime = (new Date().getTime() - e.createAt.getTime()) / 1000 / 60 / 60;
+                if(betweenTime < 12){
+            %>
+            <span style="font-size: 8px; padding:0 2px 1px 2px; margin-left:3px;" class="label label-danger">N</span>
+            <% } %>
+        </td>
+        <td class="text-center"><%=e.writer%></td>
         <td class="text-center"><%=e.hits%></td>
         <td class="text-center"><% var date = e.createAt%><% include ../../partitials_util/date_format %></td>
     </tr>
-    <% })%>
+    <%
+        cnt--;
+        });
+    %>
     </tbody>
 </table>
+<!-- search form -->
 <form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/board/<%=category%>/list/1">
     <div class="form-group">
         <input type="text" name="search" class="search-input form-control" style="width:200px" value="<%=searchValue%>">
@@ -39,6 +68,7 @@
         <a class="btn btn-default" href="/board/<%=category%>/write" role="button">글작성</a>
     </div>
 </form>
+<!-- pageination -->
 <nav class="text-center">
     <ul class="pagination">
         <%

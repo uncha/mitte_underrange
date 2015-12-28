@@ -68,7 +68,7 @@ var memberSchema = mongoose.Schema({
 });*/
 
 /*************************** custom router *******************************/
-// root
+// root 
 app.get('/', function(req, res){
 	res.render('index');
 });
@@ -131,6 +131,7 @@ app.get('/board/:category/list', function(req, res){
 app.get('/board/:category/list/:currentPage', function(req, res){
 	var category = req.params.category;
 	var currentPage = req.params.currentPage;
+	var searchTypes = req.query.search_type.split(',');
 	var searchValue = req.query.search;
 	var collection = boardSetting[category].collection;
 	var setting = extend(boardSetting.default, boardSetting[category] || {});
@@ -138,6 +139,13 @@ app.get('/board/:category/list/:currentPage', function(req, res){
 	var skipSize = (currentPage - 1) * setting.listSize;
 	var limitSize = setting.listSize;
 	var searchQuery = {};
+	if(searchValue){
+		//searchQuery.subject = new RegExp(searchValue,"gi");
+		for(var i in searchTypes){
+			var searchType = searchTypes[i];
+			searchQuery[searchType] = new RegExp(searchValue,"gi");
+		}
+	}
 
 	boardModel.count(searchQuery, function(err, c){
 		boardModel.find(searchQuery).skip(skipSize).limit(limitSize).sort({parent:-1, step:1}).exec(function(err, data){
@@ -145,7 +153,7 @@ app.get('/board/:category/list/:currentPage', function(req, res){
 			var endList = data.length - setting.listSize * currentPage + setting.listSize;
 			if(startList < 1) startList = 1;
 
-			res.render('board/' + category + '/list', {data:data, category:category, totalCount:c, currentPage:currentPage, searchValue:searchValue, setting:setting});
+			res.render('board/' + category + '/list', {data:data, category:category, totalCount:c, currentPage:currentPage, searchType:searchTypes.join('%2C'), searchValue:searchValue, setting:setting});
 		});
 	});
 });

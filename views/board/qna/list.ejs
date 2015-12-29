@@ -63,12 +63,12 @@
 <!-- search form -->
 <form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/board/<%=category%>/list/1">
     <div class="form-group">
-        <select name="search_type" class="form-control">
-          <option value='subject'>제목</option>
-          <option value='writer'>작성자</option>
-          <option value='subject,content'>제목 + 내용</option>
+        <select name="searchType" class="form-control">
+            <option value='subject,content' <%if(searchType == 'subject%2Ccontent'){%>selected<%}%>>제목 + 내용</option>
+            <option value='subject' <%if(searchType == 'subject'){%>selected<%}%>>제목</option>
+            <option value='writer' <%if(searchType == 'writer'){%>selected<%}%>>작성자</option>
         </select>
-        <input type="text" name="search" class="search-input form-control" style="width:150px" value="<%=searchValue%>">
+        <input type="text" name="searchValue" class="search-input form-control" style="width:150px" value="<%=searchValue%>">
         <button type="submit" class="btn btn-default">검색</button>
         <a class="btn btn-default" href="/board/<%=category%>/write" role="button">글작성</a>
     </div>
@@ -96,12 +96,12 @@
         if(prevPageGroupNum > 0){
             var prevPage = prevPageGroupNum * pageSize - pageSize + 1;
         %>
-        <li><a href="/board/<%=category%>/list/1<% if(searchValue){%>?search_type=<%=searchType%>&search=<%=searchValue%><%}%>" aria-label="first"><span aria-hidden="true">&laquo;</span></a></li>
-        <li><a href="/board/<%=category%>/list/<%=prevPage%><% if(searchValue){%>?search_type=<%=searchType%>&search=<%=searchValue%><%}%>" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a></li>
+        <li><a href="/board/<%=category%>/list/1<% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="first"><span aria-hidden="true">&laquo;</span></a></li>
+        <li><a href="/board/<%=category%>/list/<%=prevPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a></li>
         <%}%>
 
         <% for(var i=startPage; i<=endPage; i++){%>
-        <li <% if(i==currentPage){%>class="active"<%}%>><a href="/board/<%=category%>/list/<%=i%><% if(searchValue){%>?search_type=<%=searchType%>&search=<%=searchValue%><%}%>"><%=i%></a></li>
+        <li <% if(i==currentPage){%>class="active"<%}%>><a href="/board/<%=category%>/list/<%=i%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>"><%=i%></a></li>
         <%}%>
 
         <%
@@ -109,8 +109,8 @@
             var nextPage = nextPageGroupNum * pageSize - pageSize + 1;
             if(nextPage > totalPage) nextPage = totalPage;
         %>
-        <li><a href="/board/<%=category%>/list/<%=nextPage%><% if(searchValue){%>?search_type=<%=searchType%>&search=<%=searchValue%><%}%>" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a></li>
-        <li><a href="/board/<%=category%>/list/<%=totalPage%><% if(searchValue){%>?search_type=<%=searchType%>&search=<%=searchValue%><%}%>" aria-label="last"><span aria-hidden="true">&raquo;</span></a></li>
+        <li><a href="/board/<%=category%>/list/<%=nextPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a></li>
+        <li><a href="/board/<%=category%>/list/<%=totalPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="last"><span aria-hidden="true">&raquo;</span></a></li>
         <%}%>
 
     </ul>

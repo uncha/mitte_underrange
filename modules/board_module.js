@@ -41,8 +41,8 @@ var boardSetting = {
     // Auth 관리자는 9번
     default:{render:'default', listSize:10, pageSize:5, reply:true, comment:true, login:false, admin:false, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0},
     // add category(* 반드시 collection 정보를 입력해 주어야 함)
-    notice:{collection:'notice', render:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
-    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true, writeAuth:2}
+    notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
+    qna:{collection:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true, writeAuth:2}
 };
 
 function setRouter(app){
@@ -89,7 +89,7 @@ function setRouter(app){
                     var endList = data.length - setting.listSize * currentPage + setting.listSize;
                     if (startList < 1) startList = 1;
 
-                    res.render('board/' + category + '/list', {
+                    res.render('board/' + setting.render + '/list', {
                         user: req.cookies.member,
                         data: data,
                         category: category,
@@ -110,7 +110,7 @@ function setRouter(app){
         var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
 
         authCheck(req, res, req.url, setting.writeAuth, function() {
-            res.render('board/' + category + '/write', {user: req.cookies.member, category: category, setting: setting});
+            res.render('board/' + setting.render + '/write', {user: req.cookies.member, category: category, setting: setting});
         });
     });
 
@@ -144,7 +144,7 @@ function setRouter(app){
             boardModel.findOne({_id: id}, function (err, data) {
                 data.hits++;
                 data.save(function (err) {
-                    res.render('board/' + category + '/view', {
+                    res.render('board/' + setting.render + '/view', {
                         user: req.cookies.member,
                         data: data,
                         category: category,
@@ -166,7 +166,7 @@ function setRouter(app){
         authCheck(req, res, '/', setting.updateAuth, function() {
             authCheck(req, res, req.url, setting.viewAuth, function () {
                 boardModel.findOne({_id: id}, function (err, data) {
-                    res.render('board/' + category + '/update', {
+                    res.render('board/' + setting.render + '/update', {
                         user: req.cookies.member,
                         data: data,
                         category: category,
@@ -207,7 +207,7 @@ function setRouter(app){
 
         authCheck(req, res, req.url, setting.deleteAuth, function() {
             boardModel.findOne({_id:id}, function(err, data){
-                res.render('board/' + category + '/delete', {user:req.cookies.member, category:category, setting:setting});
+                res.render('board/' + setting.render + '/delete', {user:req.cookies.member, category:category, setting:setting});
             });
         });
     });
@@ -222,7 +222,7 @@ function setRouter(app){
 
         authCheck(req, res, req.url, setting.replyAuth, function() {
             boardModel.findOne({_id: id}, function (err, data) {
-                res.render('board/' + collection + '/reply', {
+                res.render('board/' + setting.render + '/reply', {
                     user: req.cookies.member,
                     data: data,
                     category: category,

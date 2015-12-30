@@ -2,22 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4f373cb-bb5e-4b4f-9b20-a64939e71bfc" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/board_module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/delete.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/notice/delete.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/list.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/member_module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/reply.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/update.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/util_module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/view.ejs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/views/board/default/write.ejs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/partitials/gnb.ejs" afterPath="$PROJECT_DIR$/views/partitials/gnb.ejs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/board/notice/list.ejs" afterPath="$PROJECT_DIR$/views/board/notice/list.ejs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/board/notice/reply.ejs" afterPath="$PROJECT_DIR$/views/board/notice/reply.ejs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/board/notice/view.ejs" afterPath="$PROJECT_DIR$/views/board/notice/view.ejs" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/delete.ejs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/list.ejs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/reply.ejs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/update.ejs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/view.ejs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/views/board/notice/write.ejs" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/board_module.js" afterPath="$PROJECT_DIR$/modules/board_module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="mitte_underrange.iws" />
@@ -46,7 +37,7 @@
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="867">
-              <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+              <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -65,18 +56,8 @@
       <file leaf-file-name="board_module.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/board_module.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.259542" vertical-offset="0" max-vertical-offset="5032">
-              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="delete.ejs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/views/board/default/delete.ejs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-10.461538" vertical-offset="0" max-vertical-offset="374">
-              <caret line="16" column="37" selection-start-line="16" selection-start-column="37" selection-end-line="16" selection-end-column="37" />
+            <state vertical-scroll-proportion="1.1938931" vertical-offset="0" max-vertical-offset="5032">
+              <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -86,7 +67,7 @@
         <entry file="file://$PROJECT_DIR$/modules/util_module.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="459">
-              <caret line="21" column="1" selection-start-line="21" selection-start-column="1" selection-end-line="21" selection-end-column="1" />
+              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -126,8 +107,8 @@
         <option value="$PROJECT_DIR$/modules/util_module.js" />
         <option value="$PROJECT_DIR$/modules/member_module.js" />
         <option value="$PROJECT_DIR$/app.js" />
-        <option value="$PROJECT_DIR$/modules/board_module.js" />
         <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/modules/board_module.js" />
       </list>
     </option>
   </component>
@@ -484,14 +465,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/views/board/notice/delete.ejs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21621622" vertical-offset="0" max-vertical-offset="629">
-          <caret line="8" column="31" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/views/board/qna/list.ejs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.16216215" vertical-offset="0" max-vertical-offset="2091">
@@ -557,38 +530,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/util_module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="459">
-          <caret line="21" column="1" selection-start-line="21" selection-start-column="1" selection-end-line="21" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/member_module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1530">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/views/board/default/delete.ejs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.461538" vertical-offset="0" max-vertical-offset="374">
-          <caret line="16" column="37" selection-start-line="16" selection-start-column="37" selection-end-line="16" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="867">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.8108108" vertical-offset="0" max-vertical-offset="629">
@@ -597,10 +538,42 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/views/board/default/delete.ejs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.43243244" vertical-offset="0" max-vertical-offset="629">
+          <caret line="16" column="37" selection-start-line="16" selection-start-column="37" selection-end-line="16" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/util_module.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="459">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="867">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/member_module.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="221" max-vertical-offset="1530">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/board_module.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.259542" vertical-offset="0" max-vertical-offset="5032">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+        <state vertical-scroll-proportion="1.1938931" vertical-offset="0" max-vertical-offset="5032">
+          <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
           <folding />
         </state>
       </provider>

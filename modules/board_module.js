@@ -42,7 +42,7 @@ var boardSetting = {
     default:{render:'default', listSize:10, pageSize:5, reply:true, comment:true, login:false, admin:false, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0},
     // add category(* 반드시 collection 정보를 입력해 주어야 함)
     notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
-    qna:{collection:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true, writeAuth:2}
+    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true}
 };
 
 function setRouter(app){
@@ -188,11 +188,16 @@ function setRouter(app){
 
         authCheck(req, res, '/', setting.updateAuth, function() {
             boardModel.findOne({_id: id}, function (err, originData) {
-                var updateData = utilModule.extend(originData, data);
+                if(originData.password == data.password){
+                    var updateData = utilModule.extend(originData, data);
 
-                updateData.save(function (err) {
-                    res.redirect('/board/' + category + '/view/' + id);
-                });
+                    updateData.save(function (err) {
+                        res.redirect('/board/' + category + '/view/' + id);
+                    });
+                } else {
+                    var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
+                    res.send(sendData);
+                }
             });
         });
     });
@@ -207,9 +212,56 @@ function setRouter(app){
 
         authCheck(req, res, req.url, setting.deleteAuth, function() {
             boardModel.findOne({_id:id}, function(err, data){
-                res.render('board/' + setting.render + '/delete', {user:req.cookies.member, category:category, setting:setting});
+                res.render('board/' + setting.render + '/delete', {user:req.cookies.member, data:data, category:category, setting:setting});
             });
         });
+    });
+
+    // delete process
+    app.post('/board/:category/delete_process/:id', urlencodedParser, function(req, res){
+        var category = req.params.category;
+        var id = req.params.id;
+        var data = req.body;
+        var collection = boardSetting[category].collection;
+        var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
+        var boardModel = mongoose.model(collection, boardSchema);
+
+        authCheck(req, res, req.url, setting.deleteAuth, function() {
+            boardModel.findOne({_id:id}, function(err, originData){
+                if(originData.password == data.password){
+                    boardModel.findByIdAndRemove(id, function(err){
+                        var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+                        res.send(sendData);
+                    });
+                } else {
+                    var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
+                    res.send(sendData);
+                }
+            });
+        });
+    });
+
+    app.get('/board/:category/delete_process/:id', function(req, res){
+        var category = req.params.category;
+        var id = req.params.id;
+        var collection = boardSetting[category].collection;
+        var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
+        var boardModel = mongoose.model(collection, boardSchema);
+
+        if(!req.cookies.member){
+            res.redirect('/member/login?redirect=' + '/board/' + category + '/view/' + id);
+            return;
+        }
+
+        if(req.cookies.member.boardAuth == 9) {
+            boardModel.findByIdAndRemove(id, function (err) {
+                var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+                res.send(sendData);
+            });
+        } else {
+            var sendData = utilModule.sendAndBack('삭제 권한이 없습니다.');
+            res.send(sendData);
+        }
     });
 
     // reply

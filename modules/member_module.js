@@ -15,12 +15,13 @@ var memberSchema = mongoose.Schema({
     password:{type:String},
     name:{type:String},
     email:{type:String},
-    birth:Date,
+    birth:Array,
     sex:String,
     phone:Array,
     sendEmail:Boolean,
     sendSMS:Boolean,
-    boardAuth:{type:Number, default:1}
+    boardAuth:{type:Number, default:1},
+    createAt:{type:Date, default:Date.now()},
 });
 var memberModel = mongoose.model('member', memberSchema);
 
@@ -76,10 +77,127 @@ function setRouter(app){
         }
     });
 
-    // register process
-    app.post('/member/register_process', urlencodedParser, function(req, res){
-        memberModel.create(req.body, function(err, data){
-            console.log(data);
+    // register_form search_user_id
+    app.get('/member/register_form/:searchUID', function(req, res){
+        var searchUID = req.params.searchUID;
+        searchUserId(searchUID, function(data){
+            if(data){
+                var sendData = utilModule.sendAndBack('이미 존재하는 아이디 입니다.');
+                res.send(sendData);
+            } else {
+                var sendData = utilModule.sendAndBack('이용가능한 아이디 입니다.');
+                res.send(sendData);
+            }
         });
     });
+
+    // register process
+    app.post('/member/register_process', urlencodedParser, function(req, res){
+        console.log(req.body);
+
+        var birth = [];
+        birth[0] = req.body['birth-year'];
+        birth[1] = req.body['birth-month'];
+        birth[2] = req.body['birth-date']; 
+
+        req.body.birth = birth;
+
+        memberModel.create(req.body, function(err, data){
+            console.log(data);
+            res.send('회원가입');
+        });
+    });
+
+    // register_modify
+    app.get('/member/modify', function(req, res){
+        loginCheck(req, res);
+        
+        memberModel.findOne({user_id:req.cookies.member.user_id}, function(err, data){
+            res.render('member/modify', {data:data, user:req.cookies.member});
+        });
+    });
+
+    /***************************   admin member ******************************/
+
+    // admin member list
+    app.get('/admin/member', function(req, res){
+        authCheck(req, res);
+
+        res.redirect('/admin/member/1');
+    });
+    
+    app.get('/admin/member/:currentPage', function(req, res){
+        authCheck(req, res);
+
+        var searchQuery = {};
+        var searchTypes = req.query.searchType;
+        var searchValue = req.query.searchValue;
+        var currentPage = req.params.currentPage;
+        var listSize = 20;
+        var pageSize = 10;
+        var skipSize = (currentPage - 1) * listSize;
+        var limitSize = listSize;
+
+        if (searchValue) {
+            searchQuery[searchTypes] = new RegExp(searchValue, "gi");
+        }
+        
+        memberModel.count(searchQuery, function (err, c) {
+            memberModel.find(searchQuery).skip(skipSize).limit(limitSize).sort({_id:-1}).exec(function (err, data) {
+                var startList = data.length - listSize * currentPage + 1;
+                var endList = data.length - listSize * currentPage + listSize;
+                if (startList < 1) startList = 1;
+
+                res.render('admin/member', {
+                    data: data,                    
+                    totalCount: c,
+                    currentPage: currentPage,
+                    searchType: searchTypes,
+                    searchValue: searchValue,
+                    listSize: listSize,
+                    pageSize:pageSize
+                });
+            });
+        });
+    });
+    
+    // admin modify process
+    app.post('/admin/member/modify_process/:id', urlencodedParser, function(req, res){
+        authCheck(req, res);
+
+        var redirect = req.query.redirect;
+
+        res.send('<script>history.back();</script>');
+    });
+
+    // admin delete process
+    app.get('/admin/member/delete_process/:id', function(req, res){
+        authCheck(req, res);
+
+        var id = req.params.id;
+        var redirect = req.query.redirect;
+
+        memberModel.findByIdAndRemove(id, function(err, data){
+            res.send('<script>location.href="' + redirect + '"</script>');
+        });
+    });
+}
+
+function loginCheck(req, res){
+    if(!req.cookies.member){
+        res.redirect('/member/login');
+    }
+}
+
+function searchUserId(searchUID, callback){
+    memberModel.findOne({user_id:searchUID}, function(err, data){
+        callback(data);
+    });
+}
+
+function authCheck(req, res){
+    if(!req.cookies.member || !req.cookies.member.boardAuth || req.cookies.member.boardAuth < 9){
+        res.redirect('/');
+        return;
+    }
 }

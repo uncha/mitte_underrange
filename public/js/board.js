@@ -1,6 +1,7 @@
 (function($){
     $(function(){
-        /* list */
+
+        /* board list */
         $('#search-form').on('submit', function(e){
             if($(this).find('[name=searchValue]').val() == 0){
                 alert('검색어를 입력해 주시기 바랍니다.');
@@ -9,7 +10,7 @@
             }
         });
 
-        /* view */
+        /* board view */
         $('#deleteBtn').on('click', function(e){
             e.preventDefault();
             var isDelete = confirm('삭제하시겠습니까?');
@@ -18,7 +19,7 @@
             }
         });
 
-        /* write,update,reply form */
+        /* board write,update,reply form */
         $('#write-form').on('submit', function(e){
             if($(this).find('[name=subject]').val().length == 0){
                 alert('제목을 입력해 주세요.');
@@ -45,7 +46,7 @@
             }
         });
 
-        /* delete form */
+        /* board delete form */
         $('#delete-form').on('submit', function(e){
             if($(this).find('[name=password]').val().length < 4){
                 alert('비밀번호를 4자이상 입력해 주세요.');
@@ -56,3 +57,12 @@
 
     });
 }(jQuery));
+
+// admin delete member func
+function deleteMember(id, page){
+    var isDelete = confirm('삭제 하시겠습니까?');
+    if(isDelete){
+        var redirect = '/admin/member/' + page;
+        location.href='/admin/member/delete_process/' + id + '?redirect=' + redirect;
+    }
+}

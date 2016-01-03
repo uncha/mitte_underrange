@@ -1,0 +1,130 @@
+<% include ../partitials/admin/header %>
+	<h1>회원정보</h1>
+	<span>Total : <%=totalCount%></span>
+	<!-- list -->
+	<table class="board table">
+	    <thead>
+	    <tr>
+	        <th class="text-center">번호</th>
+	        <th class="text-center">가입일</th>
+	        <th class="text-center">아이디</th>
+	        <th class="text-center">이름</th>
+	        <th class="text-center">이메일</th>
+	        <th class="text-center">생년월일</th>
+	        <th class="text-center">성별</th>
+	        <th class="text-center">핸드폰</th>
+	        <th class="text-center">이용권한</th>
+	        <th class="text-center">메일링수신</th>
+	        <th class="text-center">SMS수신</th>
+	        <th class="text-center">수정</th>
+	        <th class="text-center">삭제</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	    	<% if(totalCount == 0){%>
+		    <tr>
+		        <td class="text-center" colspan="13"><h5>등록된 회원이 없습니다.</h5></td>
+		    </tr>
+		    <%}%>
+	    	<%
+		        var cnt = totalCount - currentPage * listSize + listSize;
+		        data.forEach(function(e){
+		    %>
+		    <tr class="form-group form-group-sm">
+		        <td class="text-center"><%=cnt%></td>
+		        <td class="text-center"><% var date = e.createAt%><% include ../partitials_util/date_format %></td>
+		        <td class="text-center"><%=e.user_id%></td>
+		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.name%>" /></td>
+		        <td class="text-center"><input type="text" class="form-control" style="width:200px" value="<%=e.email%>" /></td>
+		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.birth%>" /></td>
+		        <td class="text-center">
+	        		<select name="sex" class="form-control">
+			            <option value='writer'>남자</option>
+			            <option value='writer'>여자</option>
+			        </select>
+		        </td>
+		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.phone%>" /></td>
+		        <td class="text-center">
+		        	<select name="boardAuth" class="form-control">
+			            <option value='writer'>1</option>
+			            <option value='writer'>2</option>
+			            <option value='writer'>3</option>
+			            <option value='writer'>4</option>
+			            <option value='writer'>5</option>
+			            <option value='writer'>6</option>
+			            <option value='writer'>7</option>
+			            <option value='writer'>8</option>
+			            <option value='writer'>9</option>
+			        </select>
+		        </td>
+		        <td class="text-center"><input type="checkbox" <% if(e.sendEmail){%>checked<%}%> /></td>
+		        <td class="text-center"><input type="checkbox" <% if(e.sendSMS){%>checked<%}%> /></td>
+		        <td class="text-center"><button type="button" class="btn btn-warning btn-xs">수정</button></td>
+		        <td class="text-center"><button type="button" class="btn btn-danger btn-xs" onclick="javascript:deleteMember('<%=e._id%>', <%=currentPage%>)">삭제</button></td>
+		    </tr>
+		    <%
+		        cnt--;
+		        });
+		    %>
+	    </tbody>
+	</table>
+	<!-- search form -->
+	<form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/admin/member/1">
+	    <div class="form-group">
+	        <select name="searchType" class="form-control">
+	            <option value='user_id' <%if(searchType == 'user_id'){%>selected<%}%>>아이디</option>
+	            <option value='name' <%if(searchType == 'name'){%>selected<%}%>>이름</option>
+	            <option value='email' <%if(searchType == 'email'){%>selected<%}%>>이메일</option>
+	            <option value='birth' <%if(searchType == 'birth'){%>selected<%}%>>생년월일</option>
+	            <option value='sex' <%if(searchType == 'sex'){%>selected<%}%>>성별</option>
+	            <option value='phone' <%if(searchType == 'phone'){%>selected<%}%>>핸드폰</option>
+	            <option value='sendEmail' <%if(searchType == 'sendEmail'){%>selected<%}%>>메일링수신</option>
+	            <option value='sendSMS' <%if(searchType == 'sendSMS'){%>selected<%}%>>이메일수신</option>
+	        </select>
+	        <input type="text" name="searchValue" class="search-input form-control" style="width:150px" value="<%=searchValue%>">
+	        <button type="submit" class="btn btn-default">검색</button>
+	    </div>
+	</form>
+	<!-- pageination -->
+	<nav class="text-center">
+	    <ul class="pagination">
+	        <%
+	        var listSize = listSize; // 보여질 목록 갯수
+	        var pageSize = pageSize; // 보여질 페이지 갯수
+
+	        var totalSize = totalCount; // 전체 목록 갯수
+	        var totalPage = Math.ceil(totalSize / listSize); // 전체 페이지 갯수
+	        var totalPageGroupSize = Math.ceil(totalPage / pageSize);
+	        var currentPageGroupNum = Math.ceil(currentPage / pageSize); // 현재 페이지 그룹 번호
+	        var prevPageGroupNum = currentPageGroupNum - 1;
+	        var nextPageGroupNum = currentPageGroupNum + 1;
+
+	        var startPage = currentPageGroupNum * pageSize - pageSize + 1; // 보여질 시작 페이지
+	        var endPage = currentPageGroupNum * pageSize; // 보여질 끝 페이지
+	        if(endPage > totalPage) endPage = totalPage; // 마지막 페이지 보다 보여질 끝 페이지가 크다면 변경
+	        %>
+
+	        <%
+	        if(prevPageGroupNum > 0){
+	            var prevPage = prevPageGroupNum * pageSize - pageSize + 1;
+	        %>
+	        <li><a href="/admin/member/1<% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="first"><span aria-hidden="true">&laquo;</span></a></li>
+	        <li><a href="/admin/member/<%=prevPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a></li>
+	        <%}%>
+
+	        <% for(var i=startPage; i<=endPage; i++){%>
+	        <li <% if(i==currentPage){%>class="active"<%}%>><a href="/admin/member/<%=i%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>"><%=i%></a></li>
+	        <%}%>
+
+	        <%
+	        if(nextPageGroupNum <= totalPageGroupSize){
+	            var nextPage = nextPageGroupNum * pageSize - pageSize + 1;
+	            if(nextPage > totalPage) nextPage = totalPage;
+	        %>
+	        <li><a href="/admin/member/<%=nextPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a></li>
+	        <li><a href="/admin/member/<%=totalPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="last"><span aria-hidden="true">&raquo;</span></a></li>
+	        <%}%>
+
+	    </ul>
+	</nav>
+<% include ../partitials/admin/footer %>

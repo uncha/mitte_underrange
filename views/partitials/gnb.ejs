@@ -47,7 +47,11 @@
         </li>
         <% } else { %>
         <li>
+          <%if(user.boardAuth == 9){%>
+          <a href="/admin/member" role="button" aria-haspopup="true" aria-expanded="false"><%=user.name%>님</a>
+          <%} else {%>
           <a href="#" role="button" aria-haspopup="true" aria-expanded="false"><%=user.name%>님</a>
+          <%}%>
         </li>
         <li>
           <a href="/member/modify" role="button" aria-haspopup="true" aria-expanded="false">정보수정</a>

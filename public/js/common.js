@@ -1,20 +1,10 @@
 var regEngNum = /^[A-Za-z0-9]+$/;
 var regNum = /^[0-9]+$/;
-var regKor = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+var regKor = /^[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+$/;
 var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[.]{1}[A-Za-z]{2,5}$/;
 
 (function($){
     $(function(){
-
-        /* board list */
-        $('#search-form').on('submit', function(e){
-            if($(this).find('[name=searchValue]').val() == 0){
-                alert('검색어를 입력해 주시기 바랍니다.');
-                $(this).find('[name=searchValue]').focus();
-                return false;
-            }
-        });
-
         /* board view */
         $('#deleteBtn').on('click', function(e){
             e.preventDefault();
@@ -69,7 +59,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
 
             if(!regEngNum.test($(this).find('[name=user_id]').val())){
-                alert('영문 숫자만 입력 가능 합니다.');
+                alert('아이디는 영문 숫자만 입력 가능 합니다.');
                 $(this).find('[name=user_id]').focus();
                 return false;
             }
@@ -93,7 +83,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
 
             if(!regKor.test($(this).find('[name=name]').val())){
-                alert('한글만 입력 가능 합니다.');
+                alert('이름은 한글만 입력 가능 합니다.');
                 $(this).find('[name=name]').focus();
                 return false;
             }
@@ -117,7 +107,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
 
             if(!regNum.test($(this).find('[name=birth-year]').val())){
-                alert('숫자만 입력 가능 합니다.');
+                alert('생년월일은 숫자만 입력 가능 합니다.');
                 $(this).find('[name=birth-year]').focus();
                 return false;
             }
@@ -129,13 +119,13 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
 
             if(!regNum.test($(this).find('[name=phone]').val())){
-                alert('숫자만 입력 가능 합니다.');
+                alert('핸드폰 번호는 숫자만 입력 가능 합니다.');
                 $(this).find('[name=phone]').focus();
                 return false;
             }
         });
         
-        // 회원가입폼 아이디 중복 확인
+        /* 회원가입폼 아이디 중복 확인 */
         $('#register-form .search-user-id').click(function(){
             if($('#register-form [name=user_id]').val().length < 5){
                 alert('아이디를 5자 이상 입력해 주세요.');
@@ -144,13 +134,26 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
 
             if(!regEngNum.test($('#register-form [name=user_id]').val())){
-                alert('영문 숫자만 입력 가능 합니다.');
+                alert('아이디는 영문 숫자만 입력 가능 합니다.');
                 $('#register-form [name=user_id]').focus();
                 return false;
             }
 
             var searchUID = $('#register-form [name=user_id]').val();
             location.href="/member/register_form/" + searchUID;
+        });
+
+        /* 로그인 폼 */
+        $('#login-form').on('submit', function(e){
+            if($(this).find('[name=user_id]').val().length == 0){
+                $(this).find('[name=user_id]').focus();
+                return false;
+            }
+
+            if($(this).find('[name=password]').val().length == 0){
+                $(this).find('[name=password]').focus();
+                return false;
+            }
         });
 
     });

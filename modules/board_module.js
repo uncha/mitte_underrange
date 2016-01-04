@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
+var memberModule = require('./member_module');
 var utilModule = require('./util_module');
 
 module.exports = boardModule;
@@ -42,7 +43,7 @@ var boardSetting = {
     default:{render:'default', listSize:10, pageSize:5, reply:true, comment:true, login:false, admin:false, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0},
     // add category(* 반드시 collection 정보를 입력해 주어야 함)
     notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
-    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true}
+    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true, writeAuth:0, viewAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0, replyAuth:0}
 };
 
 function setRouter(app){
@@ -125,6 +126,11 @@ function setRouter(app){
         authCheck(req, res, '/', setting.writeAuth, function() {
             boardModel.create(data, function(err, data) {
                 data.parent = data._id;
+                if(setting.writeAuth > 0){
+                    data.writer = req.cookies.member.user_id;
+                    data.user_id = req.cookies.member.user_id;
+                    data.field1 = req.cookies.member.email;
+                }
                 data.save(function (err) {
                     res.redirect('/board/' + category + '/view/' + data._id);
                 });
@@ -188,15 +194,28 @@ function setRouter(app){
 
         authCheck(req, res, '/', setting.updateAuth, function() {
             boardModel.findOne({_id: id}, function (err, originData) {
-                if(originData.password == data.password){
-                    var updateData = utilModule.extend(originData, data);
+                if(setting.updateAuth > 0){
+                    if(originData.user_id == req.cookies.member.user_id || req.cookies.member.boardAuth == 9){
+                        var updateData = utilModule.extend(originData, data);
 
-                    updateData.save(function (err) {
-                        res.redirect('/board/' + category + '/view/' + id);
-                    });
+                        updateData.save(function (err) {
+                            res.redirect('/board/' + category + '/view/' + id);
+                        });
+                    } else {
+                        var sendData = utilModule.sendAndBack('수정 권한이 없습니다.');
+                        res.send(sendData);
+                    }
                 } else {
-                    var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
-                    res.send(sendData);
+                    if (originData.password == data.password || req.cookies.member.boardAuth == 9) {
+                        var updateData = utilModule.extend(originData, data);
+
+                        updateData.save(function (err) {
+                            res.redirect('/board/' + category + '/view/' + id);
+                        });
+                    } else {
+                        var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
+                        res.send(sendData);
+                    }
                 }
             });
         });
@@ -217,7 +236,7 @@ function setRouter(app){
         });
     });
 
-    // delete process
+    // delete process not login
     app.post('/board/:category/delete_process/:id', urlencodedParser, function(req, res){
         var category = req.params.category;
         var id = req.params.id;
@@ -240,7 +259,7 @@ function setRouter(app){
             });
         });
     });
-
+    // delete process login
     app.get('/board/:category/delete_process/:id', function(req, res){
         var category = req.params.category;
         var id = req.params.id;
@@ -253,15 +272,17 @@ function setRouter(app){
             return;
         }
 
-        if(req.cookies.member.boardAuth == 9) {
-            boardModel.findByIdAndRemove(id, function (err) {
-                var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+        boardModel.findOne({_id:id}, function(err, originData) {
+            if (originData.user_id == req.cookies.member.user_id || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
+                boardModel.findByIdAndRemove(id, function (err) {
+                    var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+                    res.send(sendData);
+                });
+            } else {
+                var sendData = utilModule.sendAndBack('삭제 권한이 없습니다.');
                 res.send(sendData);
-            });
-        } else {
-            var sendData = utilModule.sendAndBack('삭제 권한이 없습니다.');
-            res.send(sendData);
-        }
+            }
+        });
     });
 
     // reply
@@ -303,6 +324,12 @@ function setRouter(app){
                     data.parent = parent;
                     data.depth = depth;
                     data.step = step;
+
+                    if(setting.writeAuth > 0){
+                        data.writer = req.cookies.member.user_id;
+                        data.user_id = req.cookies.member.user_id;
+                        data.field1 = req.cookies.member.email;
+                    }
 
                     for (var i = 0; i < db.length; i++) {
                         db[i].step++;

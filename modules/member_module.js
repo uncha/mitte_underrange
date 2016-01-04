@@ -5,6 +5,7 @@ var utilModule = require('./util_module');
 
 module.exports = memberModule;
 module.exports.setRouter = setRouter;
+module.exports.searchUserId = searchUserId;
 function memberModule(){
 
 }
@@ -21,7 +22,7 @@ var memberSchema = mongoose.Schema({
     sendEmail:Boolean,
     sendSMS:Boolean,
     boardAuth:{type:Number, default:1},
-    createAt:{type:Date, default:Date.now()},
+    createAt:{type:Date, default:Date.now()}
 });
 var memberModel = mongoose.model('member', memberSchema);
 
@@ -93,8 +94,6 @@ function setRouter(app){
 
     // register process
     app.post('/member/register_process', urlencodedParser, function(req, res){
-        console.log(req.body);
-
         var birth = [];
         birth[0] = req.body['birth-year'];
         birth[1] = req.body['birth-month'];
@@ -114,6 +113,25 @@ function setRouter(app){
         
         memberModel.findOne({user_id:req.cookies.member.user_id}, function(err, data){
             res.render('member/modify', {data:data, user:req.cookies.member});
+        });
+    });
+
+    app.post('/member/modify_process', urlencodedParser, function(req, res){
+        loginCheck(req, res);
+
+        var birth = [];
+        birth[0] = req.body['birth-year'];
+        birth[1] = req.body['birth-month'];
+        birth[2] = req.body['birth-date'];
+        req.body.birth = birth;
+        req.body.user_id = req.cookies.member.user_id; // 아이디 수정 방지
+
+        memberModel.findOne({user_id:req.cookies.member.user_id}, function(err, data){
+            data = utilModule.extend(data, req.body);
+            data.save();
+
+            var sendData = utilModule.sendAndBack('수정하였습니다.', '/');
+            res.send(sendData);
         });
     });
 
@@ -165,9 +183,15 @@ function setRouter(app){
     app.post('/admin/member/modify_process/:id', urlencodedParser, function(req, res){
         authCheck(req, res);
 
+        var id = req.params.id;
         var redirect = req.query.redirect;
 
-        res.send('<script>history.back();</script>');
+        memberModel.findOne({_id:id}, function(err,data){
+            data = utilModule.extend(data, req.body);
+            data.save();
+
+            res.send('<script>location.href="' + redirect + '"</script>');
+        });
     });
 
     // admin delete process
@@ -196,8 +220,14 @@ function searchUserId(searchUID, callback){
 }
 
 function authCheck(req, res){
-    if(!req.cookies.member || !req.cookies.member.boardAuth || req.cookies.member.boardAuth < 9){
-        res.redirect('/');
+    if(!req.cookies.member){
+        res.redirect('/member/login');
+        return;
+    }
+
+    if(!req.cookies.member.boardAuth || req.cookies.member.boardAuth < 9){
+        var sendData = utilModule.sendAndBack('이용권한이 없습니다.', '/');
+        res.send(sendData);
         return;
     }
 }

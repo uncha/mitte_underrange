@@ -30,61 +30,46 @@
 		        var cnt = totalCount - currentPage * listSize + listSize;
 		        data.forEach(function(e){
 		    %>
-		    <tr class="form-group form-group-sm">
-		        <td class="text-center"><%=cnt%></td>
-		        <td class="text-center"><% var date = e.createAt%><% include ../partitials_util/date_format %></td>
-		        <td class="text-center"><%=e.user_id%></td>
-		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.name%>" /></td>
-		        <td class="text-center"><input type="text" class="form-control" style="width:200px" value="<%=e.email%>" /></td>
-		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.birth%>" /></td>
-		        <td class="text-center">
-	        		<select name="sex" class="form-control">
-			            <option value='writer'>남자</option>
-			            <option value='writer'>여자</option>
-			        </select>
-		        </td>
-		        <td class="text-center"><input type="text" class="form-control" style="width:100px" value="<%=e.phone%>" /></td>
-		        <td class="text-center">
-		        	<select name="boardAuth" class="form-control">
-			            <option value='writer'>1</option>
-			            <option value='writer'>2</option>
-			            <option value='writer'>3</option>
-			            <option value='writer'>4</option>
-			            <option value='writer'>5</option>
-			            <option value='writer'>6</option>
-			            <option value='writer'>7</option>
-			            <option value='writer'>8</option>
-			            <option value='writer'>9</option>
-			        </select>
-		        </td>
-		        <td class="text-center"><input type="checkbox" <% if(e.sendEmail){%>checked<%}%> /></td>
-		        <td class="text-center"><input type="checkbox" <% if(e.sendSMS){%>checked<%}%> /></td>
-		        <td class="text-center"><button type="button" class="btn btn-warning btn-xs">수정</button></td>
-		        <td class="text-center"><button type="button" class="btn btn-danger btn-xs" onclick="javascript:deleteMember('<%=e._id%>', <%=currentPage%>)">삭제</button></td>
-		    </tr>
+			<form class="form-group form-group-xs" method="POST" action="/admin/member/modify_process/<%=e._id%>?redirect=/admin/member/<%=currentPage%>">
+				<tr>
+					<td class="text-center"><%=cnt%></td>
+					<td class="text-center"><% var date = e.createAt%><% include ../partitials_util/date_format %></td>
+					<td class="text-center"><%=e.user_id%></td>
+					<td class="text-center"><input name="name" type="text" class="form-control" style="width:100px" value="<%=e.name%>" /></td>
+					<td class="text-center"><input name="email" type="text" class="form-control" style="width:200px" value="<%=e.email%>" /></td>
+					<td class="text-center"><input name="birth" type="text" class="form-control" style="width:100px" value="<%=e.birth%>" /></td>
+					<td class="text-center">
+						<select name="sex" class="form-control">
+							<option value="남자" <%if(e.sex == '남자'){%>selected<%}%>>남자</option>
+							<option value="여자" <%if(e.sex == '여자'){%>selected<%}%>>여자</option>
+						</select>
+					</td>
+					<td class="text-center"><input name="phone" type="text" class="form-control" style="width:100px" value="<%=e.phone%>" /></td>
+					<td class="text-center">
+						<select name="boardAuth" class="form-control">
+							<option value=1 <%if(e.boardAuth == 1){%>selected<%}%>>1</option>
+							<option value=2 <%if(e.boardAuth == 2){%>selected<%}%>>2</option>
+							<option value=3 <%if(e.boardAuth == 3){%>selected<%}%>>3</option>
+							<option value=4 <%if(e.boardAuth == 4){%>selected<%}%>>4</option>
+							<option value=5 <%if(e.boardAuth == 5){%>selected<%}%>>5</option>
+							<option value=6 <%if(e.boardAuth == 6){%>selected<%}%>>6</option>
+							<option value=7 <%if(e.boardAuth == 7){%>selected<%}%>>7</option>
+							<option value=8 <%if(e.boardAuth == 8){%>selected<%}%>>8</option>
+							<option value=9 <%if(e.boardAuth == 9){%>selected<%}%>>9</option>
+						</select>
+					</td>
+					<td class="text-center"><input name="sendEmail" type="checkbox" <% if(e.sendEmail){%>checked<%}%> /></td>
+					<td class="text-center"><input name="sendSMS" type="checkbox" <% if(e.sendSMS){%>checked<%}%> /></td>
+					<td class="text-center"><button type="submit" class="btn btn-warning btn-ms">수정</button></td>
+					<td class="text-center"><button type="button" class="btn btn-danger btn-ms" onclick="javascript:deleteMember('<%=e._id%>', <%=currentPage%>)">삭제</button></td>
+				</tr>
+			</form>
 		    <%
 		        cnt--;
 		        });
 		    %>
 	    </tbody>
 	</table>
-	<!-- search form -->
-	<form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/admin/member/1">
-	    <div class="form-group">
-	        <select name="searchType" class="form-control">
-	            <option value='user_id' <%if(searchType == 'user_id'){%>selected<%}%>>아이디</option>
-	            <option value='name' <%if(searchType == 'name'){%>selected<%}%>>이름</option>
-	            <option value='email' <%if(searchType == 'email'){%>selected<%}%>>이메일</option>
-	            <option value='birth' <%if(searchType == 'birth'){%>selected<%}%>>생년월일</option>
-	            <option value='sex' <%if(searchType == 'sex'){%>selected<%}%>>성별</option>
-	            <option value='phone' <%if(searchType == 'phone'){%>selected<%}%>>핸드폰</option>
-	            <option value='sendEmail' <%if(searchType == 'sendEmail'){%>selected<%}%>>메일링수신</option>
-	            <option value='sendSMS' <%if(searchType == 'sendSMS'){%>selected<%}%>>이메일수신</option>
-	        </select>
-	        <input type="text" name="searchValue" class="search-input form-control" style="width:150px" value="<%=searchValue%>">
-	        <button type="submit" class="btn btn-default">검색</button>
-	    </div>
-	</form>
 	<!-- pageination -->
 	<nav class="text-center">
 	    <ul class="pagination">
@@ -127,4 +112,20 @@
 
 	    </ul>
 	</nav>
+	<!-- search form -->
+	<form id="search_form" name="search_form" method="get" class="form-inline text-right" action="/admin/member/1">
+		<div class="form-group">
+			<select name="searchType" class="form-control">
+				<option value='user_id' <%if(searchType == 'user_id'){%>selected<%}%>>아이디</option>
+				<option value='name' <%if(searchType == 'name'){%>selected<%}%>>이름</option>
+				<option value='email' <%if(searchType == 'email'){%>selected<%}%>>이메일</option>
+				<option value='birth' <%if(searchType == 'birth'){%>selected<%}%>>생년월일</option>
+				<option value='sex' <%if(searchType == 'sex'){%>selected<%}%>>성별</option>
+				<option value='phone' <%if(searchType == 'phone'){%>selected<%}%>>핸드폰</option>
+				<option value='boardAuth' <%if(searchType == 'boardAuth'){%>selected<%}%>>이용권한</option>
+			</select>
+			<input type="text" name="searchValue" class="search-input form-control" style="width:150px" value="<%=searchValue%>">
+			<button type="submit" class="btn btn-default">검색</button>
+		</div>
+	</form>
 <% include ../partitials/admin/footer %>

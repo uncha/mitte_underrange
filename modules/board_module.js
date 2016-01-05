@@ -14,15 +14,17 @@ function boardModule(){
 var boardSchema = mongoose.Schema({
     // default field(수정 금지)
     parent:{type:String},
+    ancestor:{type:String},
     step:{type:Number, default:0},
     depth:{type:Number, default:0},
-    comment:{type:String},
+    comment:{type:Boolean, default:false},
     subject:{type:String},
     content:{type:String},
     writer:{type:String},
     password:{type:String},
     hits:{type:Number, default:0},
     user_id:{type:String},
+    hidden:{type:Boolean, default:false},
     createAt:{type:Date, default:Date.now()},
     // add field
     field1:{type:String}
@@ -32,18 +34,14 @@ var boardSchema = mongoose.Schema({
  * board setting **********************************************************************************
  * 게시판 생성시 boardSetting에 카테고리를 추가한뒤 views/board/카테고리 폴더를 생성한뒤 게시판 파일을 복사해야 합니다.
  * boardSetting에 추가된 카테고리를 작성해 줍니다.
- *
- * options
- * collection, subject, listSize, pageSize, reply, comment, login, listAuth, writeAuth, deleteAuth
- *
  */
 var boardSetting = {
     // default setting(수정금지)
     // Auth 관리자는 9번
-    default:{render:'default', listSize:10, pageSize:5, reply:true, comment:true, login:false, admin:false, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0},
+    default:{render:'default', listSize:10, pageSize:5, reply:true, comment:true, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0},
     // add category(* 반드시 collection 정보를 입력해 주어야 함)
-    notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, login:false, admin:true},
-    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:false, comment:false, login:false, admin:true, writeAuth:0, viewAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0, replyAuth:0}
+    notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, writeAuth:9, replyAuth:9, updateAuth:9, deleteAuth:9},
+    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:true, comment:false}
 };
 
 function setRouter(app){
@@ -64,7 +62,6 @@ function setRouter(app){
         var skipSize = (currentPage - 1) * setting.listSize;
         var limitSize = setting.listSize;
         var searchQuery = {};
-
         authCheck(req, res, req.url, setting.listAuth, function() {
             if (searchValue) {
                 searchTypes = searchTypes.split(',');
@@ -83,7 +80,7 @@ function setRouter(app){
 
             boardModel.count(searchQuery, function (err, c) {
                 boardModel.find(searchQuery).skip(skipSize).limit(limitSize).sort({
-                    parent: -1,
+                    ancestor: -1,
                     step: 1
                 }).exec(function (err, data) {
                     var startList = data.length - setting.listSize * currentPage + 1;
@@ -125,7 +122,7 @@ function setRouter(app){
 
         authCheck(req, res, '/', setting.writeAuth, function() {
             boardModel.create(data, function(err, data) {
-                data.parent = data._id;
+                data.ancestor = data._id;
                 if(setting.writeAuth > 0){
                     data.writer = req.cookies.member.user_id;
                     data.user_id = req.cookies.member.user_id;
@@ -248,9 +245,16 @@ function setRouter(app){
         authCheck(req, res, req.url, setting.deleteAuth, function() {
             boardModel.findOne({_id:id}, function(err, originData){
                 if(originData.password == data.password){
-                    boardModel.findByIdAndRemove(id, function(err){
-                        var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
-                        res.send(sendData);
+                    boardModel.findOne({parent:id}, function(err, data){
+                        if(!data) {
+                            boardModel.findByIdAndRemove(id, function (err) {
+                                var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+                                res.send(sendData);
+                            });
+                        } else {
+                            var sendData = utilModule.sendAndBack('답글이 있는 글은 삭제하실 수 없습니다.', '/board/' + category + '/view/' + id);
+                            res.send(sendData);
+                        }
                     });
                 } else {
                     var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
@@ -259,6 +263,7 @@ function setRouter(app){
             });
         });
     });
+
     // delete process login
     app.get('/board/:category/delete_process/:id', function(req, res){
         var category = req.params.category;
@@ -274,9 +279,16 @@ function setRouter(app){
 
         boardModel.findOne({_id:id}, function(err, originData) {
             if (originData.user_id == req.cookies.member.user_id || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
-                boardModel.findByIdAndRemove(id, function (err) {
-                    var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
-                    res.send(sendData);
+                boardModel.findOne({parent:id}, function(err, data){
+                    if(!data) {
+                        boardModel.findByIdAndRemove(id, function (err) {
+                            var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
+                            res.send(sendData);
+                        });
+                    } else {
+                        var sendData = utilModule.sendAndBack('답글이 있는 글은 삭제하실 수 없습니다.');
+                        res.send(sendData);
+                    }
                 });
             } else {
                 var sendData = utilModule.sendAndBack('삭제 권한이 없습니다.');
@@ -292,6 +304,11 @@ function setRouter(app){
         var collection = boardSetting[category].collection;
         var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
+
+        if(!setting.reply){
+            res.send('<script>history.back();</script>');
+            return;
+        }
 
         authCheck(req, res, req.url, setting.replyAuth, function() {
             boardModel.findOne({_id: id}, function (err, data) {
@@ -314,16 +331,22 @@ function setRouter(app){
         var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
 
+        if(!setting.reply){
+            res.send('<script>history.back();</script>');
+            return;
+        }
+
         authCheck(req, res, '/', setting.replyAuth, function() {
             boardModel.findOne({_id: replyId}, function (err, replyData) {
-                var parent = replyData.parent;
+                var ancestor = replyData.ancestor;
                 var depth = replyData.depth + 1;
                 var step = replyData.step + 1;
 
-                boardModel.find({parent: replyData.parent, step: {$gt: replyData.step}}).exec(function (err, db) {
-                    data.parent = parent;
+                boardModel.find({ancestor: replyData.ancestor, step: {$gt: replyData.step}}).exec(function (err, db) {
+                    data.ancestor = ancestor;
                     data.depth = depth;
                     data.step = step;
+                    data.parent = replyId;
 
                     if(setting.writeAuth > 0){
                         data.writer = req.cookies.member.user_id;

@@ -15,8 +15,9 @@ function sendAndBack(msg, url){
 }
 
 function extend(obj, src) {
+    var obj2 = JSON.parse( JSON.stringify( obj ) );
     for (var key in src) {
-        if (src.hasOwnProperty(key)) obj[key] = src[key];
+        if (src.hasOwnProperty(key)) obj2[key] = src[key];
     }
-    return obj;
+    return obj2;
 }

@@ -1,14 +1,4 @@
 <% include ../../partitials/header %>
-<script>
-    /*$(function(){
-        $('#deleteBtn').click(function(e){
-            e.preventDefault();
-
-            var result = confirm('삭제하시겠습니까?');
-            if(result) location.href = $(this).attr('href');
-        });
-    });*/
-</script>
 </head>
 <body>
 <% include ../../partitials/gnb %>
@@ -20,17 +10,41 @@
     <dd><%= data.hits%></dd>
     <dt>작성자</dt>
     <dd><%= data.writer%></dd>
+    <%
+        var auth = (user)? user.boardAuth : 0;
+        var user_id = (user) ? user.user_id : null;
+        if(auth == 9){
+    %>
     <dt>이메일</dt>
-    <dd><%= data.field1%></dd>
+    <dd><a href="mailto:<%=data.field1%>"><%= data.field1%></a></dd>
+    <% } %>
     <dt>작성일</dt>
     <dd><% var date = data.createAt%><% include ../../partitials_util/date_format %></dd>
     <dt>내용</dt>
     <dd><%= data.content%></dd>
 </dl>
 <div class="button-group">
-    <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
-    <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
-    <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
+    <%if(setting.reply){%>
+        <%if(setting.replyAuth < 9){%>
+            <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
+        <%} else if(setting.replyAuth == 9 && auth==9) {%>
+            <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
+        <%}%>
+    <%}%>
+    <%if(setting.updateAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
+        <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
+    <%} else if(setting.updateAuth == 0){%>
+        <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
+    <%}%>
+    <%if(setting.deleteAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
+        <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
+    <% } else if(setting.deleteAuth == 0) { %>
+        <%if(auth != 9){%>
+            <a class="btn btn-default" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
+        <%} else {%>
+            <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
+        <%}%>
+    <% } %>
     <a class="btn btn-default" href="/board/<%=category%>/list" role="button">목록</a>
 </div>
 <% include ../../partitials/footer %>

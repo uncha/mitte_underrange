@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var app = express();
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
-var multer = require('multer');
+var multer  = require('multer');
 var memberModule = require('./modules/member_module');
 var boardModule = require('./modules/board_module');
 
@@ -22,10 +22,24 @@ db.on('error', function(err){
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(cookieParser());
 
-var upload = multer({ dest: './uploads/'});
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname)
+  }
+});
+var limits = { fileSize: 3 * 1024 * 1024 };
+var upload = multer({ storage: storage, limits:limits,onFileUploadStart: function(file) {
+        console.log(file);
+        if(file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
+            return false;
+        }
+    }});
+var type = upload.single('uploadFile');
 
 /*************************** router *******************************/
 // root
@@ -42,8 +56,8 @@ app.get('/upload', function(req, res){
 	res.render('upload');
 });
 
-app.post('/upload', upload.single('photho'), function (req, res) {
-
+app.post('/upload', type, function (req, res, next) {
+	
 });
 
 memberModule.setRouter(app);

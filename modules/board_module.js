@@ -367,7 +367,55 @@ function setRouter(app){
         });
     });
 
-    // comment_process
+    // comment-write
+    app.post('/board/:category/comment/write_process/:ancestor/:parent', urlencodedParser, function(err, data){
+        var category = req.params.category;
+        var parent = req.params.parent;
+        var ancestor = req.params.ancestor;
+        var data = req.body;
+        var collection = boardSetting[category].collection;
+        var setting = utilModule.extend(boardSetting.default, boardSetting[category] || {});
+        var boardModel = mongoose.model(collection, boardSchema);
+
+        if(!setting.comment){
+            res.send('<script>history.back();</script>');
+            return;
+        }
+
+        authCheck(req, res, '/', setting.replyAuth, function() {
+            boardModel.findOne({_id: replyId}, function (err, replyData) {
+                var ancestor = replyData.ancestor;
+                var depth = replyData.depth + 1;
+                var step = replyData.step + 1;
+
+                boardModel.find({ancestor: replyData.ancestor, step: {$gt: replyData.step}}).exec(function (err, db) {
+                    data.ancestor = ancestor;
+                    data.depth = depth;
+                    data.step = step;
+                    data.parent = replyId;
+
+                    if(setting.writeAuth > 0){
+                        data.writer = req.cookies.member.user_id;
+                        data.user_id = req.cookies.member.user_id;
+                        data.field1 = req.cookies.member.email;
+                    }
+
+                    for (var i = 0; i < db.length; i++) {
+                        db[i].step++;
+                        db[i].save();
+                    }
+
+                    boardModel.create(data, function (err, data) {
+                        res.redirect('/board/' + category + '/view/' + data.id);
+                    });
+                });
+            });
+        });
+    });
+
+    //comment-update
+
+    //comment-delete
 
 };
 

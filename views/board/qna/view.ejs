@@ -1,48 +1,165 @@
 <% include ../../partitials/header %>
+<link rel="stylesheet" type="text/css" href="/css/board.css">
 </head>
 <body>
 <% include ../../partitials/gnb %>
-<h1>View</h1>
-<dl class="notice-view dl-horizontal">
-    <dt>제목</dt>
-    <dd><%= data.subject%></dd>
-    <dt>조회수</dt>
-    <dd><%= data.hits%></dd>
-    <dt>작성자</dt>
-    <dd><%= data.writer%></dd>
-    <%
-        var auth = (user)? user.boardAuth : 0;
-        var user_id = (user) ? user.user_id : null;
-        if(auth == 9){
-    %>
-    <dt>이메일</dt>
-    <dd><a href="mailto:<%=data.field1%>"><%= data.field1%></a></dd>
-    <% } %>
-    <dt>작성일</dt>
-    <dd><% var date = data.createAt%><% include ../../partitials_util/date_format %></dd>
-    <dt>내용</dt>
-    <dd><%= data.content%></dd>
-</dl>
-<div class="button-group">
-    <%if(setting.replyAuth < 9){%>
-        <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
-    <%} else if(setting.replyAuth == 9 && auth==9) {%>
-        <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
-    <%}%>
-    <%if(setting.updateAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
-        <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
-    <%} else if(setting.updateAuth == 0){%>
-        <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
-    <%}%>
-    <%if(setting.deleteAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
-        <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
-    <% } else if(setting.deleteAuth == 0) { %>
-        <%if(auth != 9){%>
-            <a class="btn btn-default" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
-        <%} else {%>
-            <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
-        <%}%>
-    <% } %>
-    <a class="btn btn-default" href="/board/<%=category%>/list" role="button">목록</a>
+<div id="board-view">
+    <div class="subject row">
+        <div class="col-xs-12 col-sm-12 col-md-12"><h4><%=data.subject%></h4></div>
+    </div>
+    <div class="write-info row">
+        <div class="col-xs-8 col-sm-6 col-md-6">
+            <%
+            var auth = (user)? user.boardAuth : 0;
+            var user_id = (user) ? user.user_id : null;
+            if(auth == 9){
+            %>
+            작성자 : <a href="mailto:<%=data.email%>"><span class="writer"><%=data.writer%></span></a>
+            <% } else { %>
+            작성자 : <span class="writer"><%=data.writer%></span>
+            <%}%>
+            <span class="date"><% var date = data.createAt%><% include ../../partitials_util/date_format %></span></div>
+        <div class="col-xs-4 col-sm-6 col-md-6 text-right">조회수 : <%=data.hits%></div>
+    </div>
+    <div class="content row">
+        <div class="col-xs-12 col-sm-12 col-md-12"><%=data.content%></div>
+    </div>
+    <div class="util row">
+        <div class="col-xs-3 col-sm-3 col-md-3 "><span class="comment-cnt"><!--댓글 : 4--></span></div>
+        <div class="col-xs-9 col-sm-9 col-md-9">
+            <div class="button-group text-right">
+                <%if(setting.replyAuth < 9){%>
+                <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
+                <%} else if(setting.replyAuth == 9 && auth==9) {%>
+                <a class="btn btn-default" href="/board/<%=category%>/reply/<%=data._id%>" role="button">답변</a>
+                <%}%>
+                <%if(setting.updateAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
+                <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
+                <%} else if(setting.updateAuth == 0){%>
+                <a class="btn btn-default" href="/board/<%=category%>/update/<%=data._id%>" role="button">수정</a>
+                <%}%>
+                <%if(setting.deleteAuth > 0 && user_id && (data.user_id == user_id || auth == 9)){%>
+                <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
+                <% } else if(setting.deleteAuth == 0) { %>
+                <%if(auth != 9){%>
+                <a class="btn btn-default" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
+                <%} else {%>
+                <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
+                <%}%>
+                <% } %>
+                <a class="btn btn-default" href="/board/<%=category%>/list" role="button">목록</a>
+            </div>
+        </div>
+    </div>
+    <!--<div class="comment-group">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
+                댓글내용
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
+                <a href="#">답변</a>
+                <a href="#">수정</a>
+                <a href="#">삭제</a>
+            </div>
+        </div>
+        <div class="row reply">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <img class="comment-reply-icon" src="/images/board/comment_reply_icon.gif"/><span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
+                댓글내용
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
+                <a href="#">답변</a>
+                <a href="#">수정</a>
+                <a href="#">삭제</a>
+            </div>
+        </div>
+        <div class="row comment-write reply">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">작성자</label>
+                    <div class="col-xs-8 col-sm-3 col-md-3">
+                        <input class="form-control" maxlength="50" name="writer" type="text" placeholder="">
+                    </div>
+                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">비밀번호</label>
+                    <div class="col-xs-8 col-sm-3 col-md-3">
+                        <input class="form-control" maxlength="50" name="writer" type="password" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-1 col-md-1 control-label">내용</label>
+                    <div class="col-xs-12 col-sm-10 col-md-10">
+                        <textarea placeholder="내용을 입력해 주세요." class="form-control" name="content" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="center-block btn btn-default">댓글등록</button>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
+                댓글내용
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
+                <a href="#">답변</a>
+                <a href="#">수정</a>
+                <a href="#">삭제</a>
+            </div>
+        </div>
+        <div class="row comment-write">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">작성자</label>
+                    <div class="col-xs-8 col-sm-3 col-md-3">
+                        <input class="form-control" maxlength="50" name="writer" type="text" placeholder="">
+                    </div>
+                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">비밀번호</label>
+                    <div class="col-xs-8 col-sm-3 col-md-3">
+                        <input class="form-control" maxlength="50" name="writer" type="password" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-1 col-md-1 control-label">내용</label>
+                    <div class="col-xs-12 col-sm-10 col-md-10">
+                        <textarea placeholder="내용을 입력해 주세요." class="form-control" name="content" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="center-block btn btn-default">댓글등록</button>
+                </div>
+            </form>
+        </div>
+        <div class="row comment-write last">
+            <form class="form-horizontal" method="post" action="/board/comment/write/<%=data.id%>">
+                <div class="form-group">
+                    <label class="col-xs-8 col-sm-2 col-md-1 control-label">작성자</label>
+                    <div class="col-xs-8 col-sm-4 col-md-3">
+                        <input class="form-control" maxlength="10" name="writer" type="text" placeholder="">
+                    </div>
+                    <label class="col-xs-8 col-sm-2 col-md-1 control-label">비밀번호</label>
+                    <div class="col-xs-8 col-sm-4 col-md-3">
+                        <input class="form-control" maxlength="16" name="writer" type="password" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-2 col-md-1 control-label">내용</label>
+                    <div class="col-xs-12 col-sm-10 col-md-10">
+                        <textarea placeholder="내용을 입력해 주세요." class="form-control" name="content" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="center-block btn btn-default">댓글등록</button>
+                </div>
+            </form>
+        </div>
+    </div>-->
 </div>
 <% include ../../partitials/footer %>

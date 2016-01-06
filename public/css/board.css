@@ -1,3 +1,29 @@
 /* list */
 
 /* write */
+
+/* view */
+#board-view .row{margin:0; padding:0 20px;}
+#board-view .subject{padding:16px 20px; border-top:2px solid #323232}
+#board-view .subject h4{margin:0; font-weight: bold}
+#board-view .write-info{padding:14px 20px; border-top:1px solid #bcc5d4; border-bottom: 1px solid #bcc5d4}
+#board-view .content{padding:14px 20px 40px 20px}
+#board-view .write-info .date{margin-left:10px; color:#b7b7b7; font-size: 13px}
+#board-view .write-info .writer{font-weight: bold;}
+#board-view .comment-cnt{display:block; margin-top:15px}
+
+/* comment */
+#board-view .comment-group{padding:10px 0; border-top:1px solid #bcc5d4; border-bottom:2px solid #323232; margin-top:10px; background: #f2f2f2}
+#board-view .comment-group .writer{font-weight:bold;}
+#board-view .comment-group .row{border-bottom:1px solid #bcc5d4; padding:10px 0; margin: 0 20px}
+#board-view .comment-group .comment-content{padding:10px 20px}
+#board-view .comment-group .date{font-size:11px; margin-left:8px}
+#board-view .comment-group .button-group a{font-size: 13px; padding-left:5px}
+#board-view .comment-group .reply{margin-left:50px}
+#board-view .comment-group .reply .comment-content{padding-left:33px}
+#board-view .comment-group .reply .comment-reply-icon{margin-right:5px; padding-bottom: 7px}
+#board-view .comment-group .comment-write{padding-top:20px}
+#board-view .comment-group .comment-write.last{border-bottom: 0}
+
+/*
+#board-view .comment-group .form-group{border-bottom:0; padding:0; margin:0}*/

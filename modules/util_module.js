@@ -14,10 +14,22 @@ function sendAndBack(msg, url){
     return sendData;
 }
 
-function extend(obj, src) {
+function extendSetting(obj, src) {
     var obj2 = JSON.parse( JSON.stringify( obj ) );
     for (var key in src) {
         if (src.hasOwnProperty(key)) obj2[key] = src[key];
     }
     return obj2;
+}
+
+function extend(obj, src){
+
+    console.log(obj);
+    console.log('-----------------------')
+    console.log(src);
+
+    for (var key in src) {
+        if (src.hasOwnProperty(key)) obj[key] = src[key];
+    }
+    return obj;
 }

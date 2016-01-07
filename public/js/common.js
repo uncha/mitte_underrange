@@ -34,6 +34,9 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
                 return false;
             }
 
+            // smart editor2 insert textarea content
+            oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);
+
             if($(this).find('[name=content]').val().length == 0){
                 alert('내용을 입력해 주세요.');
                 $(this).find('[name=content]').focus();
@@ -156,6 +159,9 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
+        /* view */
+        var contText = $('.content .cont').text();
+        $('.content .cont').html(contText);
     });
 }(jQuery));
 

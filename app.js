@@ -5,6 +5,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var multer  = require('multer');
+// custom module
 var memberModule = require('./modules/member_module');
 var boardModule = require('./modules/board_module');
 
@@ -12,10 +13,10 @@ var boardModule = require('./modules/board_module');
 mongoose.connect('mongodb://uncha:rbxo6727@ds033175.mongolab.com:33175/mitte_underrange');
 var db = mongoose.connection;
 db.once('open', function(){
-	console.log('DB Connected');
+    console.log('DB Connected');
 });
 db.on('error', function(err){
-	console.log('DB Error :', err);
+    console.log('DB Error :', err);
 });
 
 /*************************** express *******************************/
@@ -25,20 +26,28 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './public/uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + file.originalname)
-  }
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '_' + file.originalname);
+    }
 });
-var limits = { fileSize: 3 * 1024 * 1024 };
-var upload = multer({ storage: storage, limits:limits,onFileUploadStart: function(file) {
-        console.log(file);
-        if(file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
-            return false;
+
+var limits = { fileSize: 2 * 1024 * 1024 }; // 2MB
+var upload = multer({
+    storage: storage,
+    limits:limits,
+    fileFilter:function(req, file, cb){
+        var type = file.mimetype;
+        var typeArray = type.split("/");
+        if (typeArray[0] == "video" || typeArray[0] == "image") {
+            cb(null, true);
+        }else {
+            cb(null, false);
         }
-    }});
+    }
+});
 var type = upload.single('uploadFile');
 
 /*************************** router *******************************/
@@ -57,7 +66,15 @@ app.get('/upload', function(req, res){
 });
 
 app.post('/upload', type, function (req, res, next) {
-	
+    if(req.file){
+        res.send('<script>alert("업로드성공!"); location.href="/upload";</script>')
+    } else {
+        res.send('<script>alert("업로드실패!"); location.href="/upload";</script>')
+    }
+});
+
+app.get('/se2', function(req, res){
+    res.render('se2');
 });
 
 memberModule.setRouter(app);

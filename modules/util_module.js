@@ -1,6 +1,7 @@
 module.exports = utilModule;
 module.exports.sendAndBack = sendAndBack;
 module.exports.extend = extend;
+module.exports.extendSetting = extendSetting;
 function utilModule(){
 
 }
@@ -23,11 +24,6 @@ function extendSetting(obj, src) {
 }
 
 function extend(obj, src){
-
-    console.log(obj);
-    console.log('-----------------------')
-    console.log(src);
-
     for (var key in src) {
         if (src.hasOwnProperty(key)) obj[key] = src[key];
     }

@@ -5,7 +5,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
 
 (function($){
     $(function(){
-        /* board view */
+        /***************************************** board view *****************************************/
         $('#deleteBtn').on('click', function(e){
             e.preventDefault();
             var isDelete = confirm('삭제하시겠습니까?');
@@ -14,8 +14,15 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
-        /* board write,update,reply form */
+        // 게시글 string -> html 변환
+        var contText = $('.content .cont').text();
+        $('.content .cont').html(contText);
+
+        /***************************************** board write,update,reply form *****************************************/
         $('#write-form').on('submit', function(e){
+            // smart editor2 insert textarea content
+            oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);
+
             if($(this).find('[name=subject]').val().length == 0){
                 alert('제목을 입력해 주세요.');
                 $(this).find('[name=subject]').focus();
@@ -34,9 +41,6 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
                 return false;
             }
 
-            // smart editor2 insert textarea content
-            oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);
-
             if($(this).find('[name=content]').val().length == 0){
                 alert('내용을 입력해 주세요.');
                 $(this).find('[name=content]').focus();
@@ -44,7 +48,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
-        /* board delete form */
+        /***************************************** board delete form *****************************************/
         $('#delete-form').on('submit', function(e){
             if($(this).find('[name=password]').val().length < 4){
                 alert('비밀번호를 4자이상 입력해 주세요.');
@@ -53,7 +57,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
-        /* 회원가입 폼 */
+        /***************************************** member register-form *****************************************/
         $('#register-form').on('submit', function(e){
             if($(this).find('[name=user_id]').val().length < 5){
                 alert('아이디를 5자 이상 입력해 주세요.');
@@ -128,7 +132,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
         
-        /* 회원가입폼 아이디 중복 확인 */
+        // 아이디 중복 확인
         $('#register-form .search-user-id').click(function(){
             if($('#register-form [name=user_id]').val().length < 5){
                 alert('아이디를 5자 이상 입력해 주세요.');
@@ -146,7 +150,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             location.href="/member/register_form/" + searchUID;
         });
 
-        /* 로그인 폼 */
+        /***************************************** login-form *****************************************/
         $('#login-form').on('submit', function(e){
             if($(this).find('[name=user_id]').val().length == 0){
                 $(this).find('[name=user_id]').focus();
@@ -159,11 +163,15 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
-        /* view */
-        var contText = $('.content .cont').text();
-        $('.content .cont').html(contText);
+        /***************************************** comment-list *****************************************/
+
+
     });
 }(jQuery));
+
+
+
+/***************************************** comment function *****************************************/
 
 // admin delete member func
 function deleteMember(id, page){
@@ -172,4 +180,15 @@ function deleteMember(id, page){
         var redirect = '/admin/member/' + page;
         location.href='/admin/member/delete_process/' + id + '?redirect=' + redirect;
     }
+}
+
+// comment reply func
+function commentReply(commentId, depth){
+    $('.comment-reply-form').remove();
+    var $commentReplyForm = $('.comment-reply-data').clone();
+    if(depth > 0) $commentReplyForm.addClass('reply');
+    $commentReplyForm.addClass('comment-reply-form').removeClass('comment-reply-data');
+    var action = $commentReplyForm.children('form').attr('action') + commentId;
+    $commentReplyForm.children('form').attr('action', action);
+    $('#' + commentId).after($commentReplyForm);
 }

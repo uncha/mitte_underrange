@@ -23,7 +23,7 @@
 #board-view .comment-group .reply .comment-content{padding-left:33px}
 #board-view .comment-group .reply .comment-reply-icon{margin-right:5px; padding-bottom: 7px}
 #board-view .comment-group .comment-write{padding-top:10px}
-#board-view .comment-group .comment-write.last{border-bottom: 0}
+#board-view .comment-group .last{border-bottom: 0}
 #board-view .comment-group .comment-reply-data{display:none}
 #board-view .comment-group .parent-writer{font-size:11px; margin-right:8px}
 

@@ -245,20 +245,26 @@ function setRouter(app){
             });
         });
     });
-
-    // delete
-    app.get('/board/:category/delete/:id', function(req, res){
+    
+    // password
+    app.get('/board/:category/password/:id', function(req, res){
         var category = req.params.category;
         var id = req.params.id;
+        var action = req.query.action;
+        var commentId = req.query.commentId;
         var collection = boardSetting[category].collection;
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
 
-        authCheck(req, res, req.url, setting.deleteAuth, function() {
-            boardModel.findOne({_id:id}, function(err, data){
-                res.render('board/' + setting.render + '/delete', {user:req.cookies.member, data:data, category:category, setting:setting});
+        if(!commentId){
+            authCheck(req, res, req.url, setting.deleteAuth, function() {
+                res.render('board/' + setting.render + '/password', {user:req.cookies.member, action:action, category:category, setting:setting});
             });
-        });
+        } else {
+            authCheck(req, res, req.url, setting.commentAuth, function() {
+                res.render('board/' + setting.render + '/password', {user:req.cookies.member, action:action, category:category, setting:setting});
+            });
+        }
     });
 
     // delete process not login
@@ -413,6 +419,11 @@ function setRouter(app){
         data.category = category;
 
         authCheck(req, res, '/', setting.commentAuth, function() {
+            if(setting.commentAuth > 0){
+                data.writer = req.cookies.member.user_id;
+                data.user_id = req.cookies.member.user_id;
+            }
+
             commentModel.findOne({_id:parent}, function (err, commentData) {
                 if(commentData){ // 댓글의 댓글인 경우
                     data.parent_writer = commentData.writer;
@@ -426,12 +437,6 @@ function setRouter(app){
                         data.ancestor = ancestor;
                         data.depth = depth;
                         data.step = step;
-
-                        if(setting.writeAuth > 0){
-                            data.writer = req.cookies.member.user_id;
-                            data.user_id = req.cookies.member.user_id;
-                            data.field1 = req.cookies.member.email;
-                        }
 
                         for (var i = 0; i < db.length; i++) {
                             db[i].step++;
@@ -454,11 +459,68 @@ function setRouter(app){
             });
         });
     });
+    
+    //comment-delete get
+    app.get('/board/:category/comment/delete_process/:listId/:commentId', function(req,res){
+        var category = req.params.category;
+        var listId = req.params.listId;
+        var commentId= req.params.commentId;
+        var collection = boardSetting[category].collection;
+        var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
 
-    //comment-update
+        if(!setting.comment){
+            res.send('<script>history.back();</script>');
+            return;
+        }
 
-    //comment-delete
+        commentModel.findOne({_id:commentId}, function(err, originData) {
+            if (originData.user_id == req.cookies.member.user_id || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
+                commentModel.findOne({parent:commentId}, function(err, data){
+                    if(!data) {
+                        commentModel.findByIdAndRemove(commentId, function (err) {
+                            var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/view/' + listId);
+                            res.send(sendData);
+                        });
+                    } else {
+                        var sendData = utilModule.sendAndBack('답글이 있는 글은 삭제하실 수 없습니다.');
+                        res.send(sendData);
+                    }
+                });
+            } else {
+                var sendData = utilModule.sendAndBack('삭제 권한이 없습니다.');
+                res.send(sendData);
+            }
+        });
+    });
 
+    //comment-delete post
+    app.post('/board/:category/comment/delete_process/:listId/:commentId', urlencodedParser, function(req,res){
+        var category = req.params.category;
+        var listId = req.params.listId;
+        var commentId= req.params.commentId;
+        var data = req.body;
+        var collection = boardSetting[category].collection;
+        var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
+
+        commentModel.findOne({_id:commentId}, function(err, originData){
+            if(originData.password == data.password){
+                commentModel.findOne({parent:commentId}, function(err, data){
+                    if(!data) {
+                        commentModel.findByIdAndRemove(commentId, function (err) {
+                            var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/view/' + listId);
+                            res.send(sendData);
+                        });
+                    } else {
+                        var sendData = utilModule.sendAndBack('답글이 있는 글은 삭제하실 수 없습니다.', '/board/' + category + '/view/' + listId);
+                        res.send(sendData);
+                    }
+                });
+            } else {
+                var sendData = utilModule.sendAndBack('이전에 입력한 비밀번호와 동일한 비밀번호를 입력하셔야 합니다.');
+                res.send(sendData);
+            }
+        });
+    });
 };
 
 function authCheck(req, res, redirect, authNum, callback){

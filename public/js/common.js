@@ -163,8 +163,46 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
-        /***************************************** comment-list *****************************************/
+        /***************************************** comment-form *****************************************/
+        $('#comment-form').on('submit', function(e){
+            if($(this).find('[name=writer]').val().length == 0){
+                alert('작성자를 입력해 주세요.');
+                $(this).find('[name=writer]').focus();
+                return false;
+            }
 
+            if($(this).find('[name=password]').val().length < 4){
+                alert('비밀번호를 4자 이상 입력해 주세요.');
+                $(this).find('[name=password]').focus();
+                return false;
+            }
+
+            if($(this).find('[name=content]').val().length == 0){
+                alert('내용을 입력해 주세요.');
+                $(this).find('[name=content]').focus();
+                return false;
+            }
+        });
+
+        $('.comment-group').on('submit', '#comment-reply-form', function(e){
+            if($(this).find('[name=writer]').val().length == 0){
+                alert('작성자를 입력해 주세요.');
+                $(this).find('[name=writer]').focus();
+                return false;
+            }
+            
+            if($(this).find('[name=password]').val().length < 4){
+                alert('비밀번호를 4자 이상 입력해 주세요.');
+                $(this).find('[name=password]').focus();
+                return false;
+            }
+
+            if($(this).find('[name=content]').val().length == 0){
+                alert('내용을 입력해 주세요.');
+                $(this).find('[name=content]').focus();
+                return false;
+            }
+        });
 
     });
 }(jQuery));
@@ -190,5 +228,6 @@ function commentReply(commentId, depth){
     $commentReplyForm.addClass('comment-reply-form').removeClass('comment-reply-data');
     var action = $commentReplyForm.children('form').attr('action') + commentId;
     $commentReplyForm.children('form').attr('action', action);
+    $commentReplyForm.children('form').attr('id', 'comment-reply-form');
     $('#' + commentId).after($commentReplyForm);
 }

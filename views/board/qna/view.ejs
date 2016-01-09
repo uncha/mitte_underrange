@@ -26,6 +26,7 @@
             <span class="cont"><%=data.content%></span>
         </div>
     </div>
+    <!-- comment count, button -->
     <div class="util row">
         <div class="col-xs-3 col-sm-3 col-md-3 "><span class="comment-cnt">댓글 : <%=commentData.length%></span></div>
         <div class="col-xs-9 col-sm-9 col-md-9">
@@ -44,7 +45,7 @@
                 <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
                 <% } else if(setting.deleteAuth == 0) { %>
                 <%if(auth != 9){%>
-                <a class="btn btn-default" href="/board/<%=category%>/delete/<%=data._id%>" role="button">삭제</a>
+                <a class="btn btn-default" href="/board/<%=category%>/password/<%=data._id%>?action=/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a> 
                 <%} else {%>
                 <a class="btn btn-default" id="deleteBtn" href="/board/<%=category%>/delete_process/<%=data._id%>" role="button">삭제</a>
                 <%}%>
@@ -53,94 +54,10 @@
             </div>
         </div>
     </div>
+    <!-- comment group -->
     <div class="comment-group">
-        <!--<div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
-                댓글내용
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
-                <a href="#">답변</a>
-                <a href="#">수정</a>
-                <a href="#">삭제</a>
-            </div>
-        </div>
-        <div class="row reply">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <img class="comment-reply-icon" src="/images/board/comment_reply_icon.gif"/><span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
-                댓글내용
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
-                <a href="#">답변</a>
-                <a href="#">수정</a>
-                <a href="#">삭제</a>
-            </div>
-        </div>
-        <div class="row comment-write reply">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">작성자</label>
-                    <div class="col-xs-8 col-sm-3 col-md-3">
-                        <input class="form-control" maxlength="50" name="writer" type="text" placeholder="">
-                    </div>
-                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">비밀번호</label>
-                    <div class="col-xs-8 col-sm-3 col-md-3">
-                        <input class="form-control" maxlength="50" name="writer" type="password" placeholder="">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-1 col-md-1 control-label">내용</label>
-                    <div class="col-xs-12 col-sm-10 col-md-10">
-                        <textarea placeholder="내용을 입력해 주세요." class="form-control" name="content" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="center-block btn btn-default">댓글등록</button>
-                </div>
-            </form>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <span class="writer">kyutae21c</span> <span class="date">2016-01-05</span>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 comment-content">
-                댓글내용
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
-                <a href="#">답변</a>
-                <a href="#">수정</a>
-                <a href="#">삭제</a>
-            </div>
-        </div>
-        <div class="row comment-write">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">작성자</label>
-                    <div class="col-xs-8 col-sm-3 col-md-3">
-                        <input class="form-control" maxlength="50" name="writer" type="text" placeholder="">
-                    </div>
-                    <label class="col-xs-8 col-sm-1 col-md-1 control-label">비밀번호</label>
-                    <div class="col-xs-8 col-sm-3 col-md-3">
-                        <input class="form-control" maxlength="50" name="writer" type="password" placeholder="">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-1 col-md-1 control-label">내용</label>
-                    <div class="col-xs-12 col-sm-10 col-md-10">
-                        <textarea placeholder="내용을 입력해 주세요." class="form-control" name="content" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="center-block btn btn-default">댓글등록</button>
-                </div>
-            </form>
-        </div>-->
-        <%commentData.forEach(function(e){%>
-            <div id="<%=e._id%>" class="row <%if(e.depth > 0){%>reply<%}%>">
+        <%var cnt = 1; commentData.forEach(function(e){%>
+            <div id="<%=e._id%>" class="row<%if(e.depth > 0){%> reply<%}%><%if(setting.commentAuth > 0 && !user && (cnt == commentData.length)){%> last<%}%>">
                 <div class="col-xs-12 col-sm-12 col-md-12">
                     <%if(e.depth > 0){%><img class="comment-reply-icon" src="/images/board/comment_reply_icon.gif"/><%}%><span class="writer"><%=e.writer%></span> <span class="date"><% var date = e.createAt%><% include ../../partitials_util/date_format %></span>
                 </div>
@@ -151,13 +68,30 @@
                     <%=e.content%>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-12 text-right button-group">
-                    <a href="javascript:commentReply('<%=e._id%>', '<%=e.depth%>');">답변</a>
-                    <a href="javascript:commentDelete('<%=e._id%>');">삭제</a>
+                    <%if(setting.commentAuth > 0){%>
+                        <%if(user){%>
+                        <a href="javascript:commentReply('<%=e._id%>', '<%=e.depth%>');">답변</a>
+                        <% } else {%>
+                        <a href="/member/login?redirect=/board/<%=category%>/view/<%=data._id%>">답변</a>
+                        <%}%>
+                        <%if(user && (user.user_id == e.user_id) || (auth == 9)){%>
+                        <a href="/board/<%=category%>/comment/delete_process/<%=data._id%>/<%=e._id%>">삭제</a>
+                        <%}%>
+                    <%} else {%>
+                        <a href="javascript:commentReply('<%=e._id%>', '<%=e.depth%>');">답변</a>
+                        <%if(auth==9){%>
+                        <a href="/board/<%=category%>/comment/delete_process/<%=data._id%>/<%=e._id%>">삭제</a>
+                        <% } else {%>
+                        <a href="/board/<%=category%>/password/<%=data._id%>?commentId=<%=e._id%>&action=/board/<%=category%>/comment/delete_process/<%=data._id%>/<%=e._id%>">삭제</a>
+                        <%}%>
+                    <%}%>
                 </div>
             </div>
-        <%});%>
+        <%cnt++ });%>
+        <!-- comment form -->
+        <% if(setting.commentAuth == 0 || user){%>
         <div class="row comment-write last">
-            <form class="form-horizontal" method="post" action="/board/<%=category%>/comment/write_process/<%=data.id%>/<%=data.id%>">
+            <form class="form-horizontal" id="comment-form" method="post" action="/board/<%=category%>/comment/write_process/<%=data.id%>/<%=data.id%>">
                 <%if(setting.commentAuth == 0){%>
                 <div class="form-group">
                     <label class="col-xs-8 col-sm-2 col-md-1 control-label">작성자</label>
@@ -181,6 +115,8 @@
                 </div>
             </form>
         </div>
+        <%}%>
+        <!-- copy data form -->
         <div class="row comment-write comment-reply-data">
             <form class="form-horizontal" method="post" action="/board/<%=category%>/comment/write_process/<%=data.id%>/">
                 <%if(setting.commentAuth == 0){%>

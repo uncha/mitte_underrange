@@ -1,4 +1,6 @@
 /* list */
+table td .new-icon{font-size: 8px; padding:0 2px 1px 2px; margin-left:3px;}
+table td .comment-count{color:#d9534f;}
 
 /* write */
 
@@ -12,7 +14,7 @@
 #board-view .write-info .writer{font-weight: bold;}
 #board-view .comment-cnt{display:block; margin-top:15px}
 
-/* comment */
+/* view > comment */
 #board-view .comment-group{padding:10px 0; border-top:1px solid #bcc5d4; border-bottom:2px solid #323232; margin-top:10px; background: #f2f2f2}
 #board-view .comment-group .writer{font-weight:bold;}
 #board-view .comment-group .row{border-bottom:1px solid #bcc5d4; padding:5px 0; margin: 0 20px}

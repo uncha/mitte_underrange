@@ -1,4 +1,5 @@
 <% include ../../partitials/header %>
+<link rel="stylesheet" type="text/css" href="/css/board.css">
 </head>
 <body>
 <% include ../../partitials/gnb %>
@@ -42,12 +43,16 @@
             <img style="width:10px; margin:0 5px 0 <%=margin%>px" src="/images/board/reply_icon.png" />
             <% } %>
             <a style="vertical-align: text-top" href="/board/<%=category%>/view/<%=e._id%>"><%=e.subject%></a>
-
+            <%
+                if(setting.comment && e.commentCount > 0){
+            %>
+                <span class="comment-count">[<%=e.commentCount%>]</span>
+            <% } %>
             <%
                 var betweenTime = (new Date().getTime() - e.createAt.getTime()) / 1000 / 60 / 60;
                 if(betweenTime < 12){
             %>
-            <span style="font-size: 8px; padding:0 2px 1px 2px; margin-left:3px;" class="label label-danger">N</span>
+            <span class="label label-danger new-icon">N</span>
             <% } %>
         </td>
         <td class="text-center"><%=e.writer%></td>

@@ -57,7 +57,7 @@ var boardSetting = {
     default:{collection:'', render:'default', listSize:10, pageSize:5, reply:true, comment:true, listAuth:0, viewAuth:0, writeAuth:0, replyAuth:0, updateAuth:0, deleteAuth:0, commentAuth:0},
     // add category(* 반드시 collection 정보를 입력해 주어야 함)
     notice:{collection:'notice', subject:'공지사항', reply:false, comment:false, writeAuth:9, replyAuth:9, updateAuth:9, deleteAuth:9},
-    qna:{collection:'qna', render:'qna', subject:'질문과답변', reply:true, comment:true, commentAuth:0}
+    qna:{collection:'qna', subject:'질문과답변', reply:true, comment:true, commentAuth:0}
 };
 
 function setRouter(app){
@@ -103,16 +103,34 @@ function setRouter(app){
                     var endList = data.length - setting.listSize * currentPage + setting.listSize;
                     if (startList < 1) startList = 1;
 
-                    res.render('board/' + setting.render + '/list', {
-                        user: req.cookies.member,
-                        data: data,
-                        category: category,
-                        totalCount: c,
-                        currentPage: currentPage,
-                        searchType: searchTypes,
-                        searchValue: searchValue,
-                        setting: setting
-                    });
+                    if(setting.comment){
+                        var cnt = 1;
+                        data.forEach(function(e){
+                            var _id = e._id;
+                            commentModel.count({listId:_id}, function(err, commentCount){
+                                e.commentCount = commentCount;
+                                if(cnt == data.length){
+                                    renderList();
+                                }
+                                cnt++;
+                            });                            
+                        });
+                    } else{
+                        renderList();
+                    }
+
+                    function renderList(){
+                        res.render('board/' + setting.render + '/list', {
+                            user: req.cookies.member,
+                            data: data,
+                            category: category,
+                            totalCount: c,
+                            currentPage: currentPage,
+                            searchType: searchTypes,
+                            searchValue: searchValue,
+                            setting: setting
+                        });
+                    }
                 });
             });
         });

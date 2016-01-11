@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
 var memberModule = require('./member_module');
 var utilModule = require('./util_module');
+var multer  = require('multer');
 
 module.exports = boardModule;
 module.exports.setRouter = setRouter;
@@ -24,9 +25,11 @@ var boardSchema = mongoose.Schema({
     hits:{type:Number, default:0},
     user_id:{type:String},
     hidden:{type:Boolean, default:false},
+    files:{type:Array},
+    images:{type:Array},
     createAt:{type:Date, default:Date.now()},
     // add field
-    field1:{type:String}
+    field1:{type:String} // email
 });
 
 var commentSchema = mongoose.Schema({
@@ -60,6 +63,32 @@ var boardSetting = {
     qna:{collection:'qna', subject:'질문과답변', reply:true, comment:true, commentAuth:0}
 };
 
+// file upload multer setting
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '_' + file.originalname);
+    }
+});
+var limits = { fileSize: 10 * 1024 * 1024 }; // 10MB
+var upload = multer({
+    storage: storage,
+    limits:limits,
+    fileFilter:function(req, file, cb){
+        var type = file.mimetype;
+        var typeArray = type.split("/");
+        if (typeArray[0] == "video" || typeArray[0] == "image") {
+            cb(null, true);
+        }else {
+            cb(null, false);
+        }
+    }
+});
+var type = upload.fields([{name:'file', maxCount:5}, {name:'image', maxCount:5}]);
+
+// router setting
 function setRouter(app){
     // list
     app.get('/board/:category/list', function(req, res){
@@ -147,12 +176,14 @@ function setRouter(app){
     });
 
     // write_process
-    app.post('/board/:category/write_process', urlencodedParser, function(req, res){
+    app.post('/board/:category/write_process', urlencodedParser, type, function(req, res){
         var category = req.params.category;
         var data = req.body;
         var collection = boardSetting[category].collection;
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
+        
+        if(req.files) data.files = req.files;
 
         authCheck(req, res, '/', setting.writeAuth, function() {
             boardModel.create(data, function(err, data) {
@@ -230,7 +261,6 @@ function setRouter(app){
         var category = req.params.category;
         var id = req.params.id;
         var data = req.body;
-        console.log(data);
         var collection = boardSetting[category].collection;
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);

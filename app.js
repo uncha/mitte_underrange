@@ -53,16 +53,16 @@ var type = upload.single('uploadFile');
 /*************************** router *******************************/
 // root
 app.get('/', function(req, res){
-	res.render('index', {user:req.cookies.member});
+    res.render('index', {user:req.cookies.member});
 });
 
 // 회사소개
 app.get('/company/introduce', function(req, res){
-	res.render('company/introduce', {user:req.cookies.member});
+    res.render('company/introduce', {user:req.cookies.member});
 });
 
 app.get('/upload', function(req, res){
-	res.render('upload');
+    res.render('upload');
 });
 
 app.post('/upload', type, function (req, res, next) {
@@ -82,8 +82,8 @@ boardModule.setRouter(app);
 
 /*************************** listen *******************************/
 app.listen(3000, function(){
-	console.log('--------------------------------------------------------------------------------');
-	console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate() + '   ' + new Date().getHours() + ':' + new Date().getMinutes() + ':' + new Date().getSeconds());
-	console.log('--------------------------------------------------------------------------------');
-	console.log('Server on~!');
+    console.log('--------------------------------------------------------------------------------');
+    console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate() + '   ' + new Date().getHours() + ':' + new Date().getMinutes() + ':' + new Date().getSeconds());
+    console.log('--------------------------------------------------------------------------------');
+    console.log('Server on~!');
 });

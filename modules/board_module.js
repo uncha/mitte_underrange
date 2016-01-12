@@ -1,12 +1,15 @@
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
+var multer  = require('multer');
+var fs = require('fs');
+var path = require('path');
 var memberModule = require('./member_module');
 var utilModule = require('./util_module');
-var multer  = require('multer');
 
 module.exports = boardModule;
 module.exports.setRouter = setRouter;
+
 function boardModule(){
 
 }
@@ -49,6 +52,12 @@ var commentSchema = mongoose.Schema({
 });
 var commentModel = mongoose.model('comment', commentSchema);
 
+var tempImageSchema = mongoose.Schema({
+    fileURI:{type:String},
+    createAt:{type:Date, default:Date.now()}
+});
+var tempImageModel = mongoose.model('tempImage', tempImageSchema);
+
 /*
  * board setting **********************************************************************************
  * 게시판 생성시 boardSetting에 카테고리를 추가한뒤 views/board/카테고리 폴더를 생성한뒤 게시판 파일을 복사해야 합니다.
@@ -72,21 +81,35 @@ var storage = multer.diskStorage({
         cb(null, Date.now() + '_' + file.originalname);
     }
 });
-var limits = { fileSize: 10 * 1024 * 1024 }; // 10MB
-var upload = multer({
+var limits = { fileSize: 2 * 1024 * 1024 }; // 업로드 가능 파일 개당 2MB 제한
+var limitMimetype = ['html','htm','asp','aspx','php','jsp','cer','cdx','asa','php3','war','js','css','java'];
+var fileUpload = multer({
     storage: storage,
     limits:limits,
     fileFilter:function(req, file, cb){
-        var type = file.mimetype;
-        var typeArray = type.split("/");
-        if (typeArray[0] == "video" || typeArray[0] == "image") {
+        var type = file.originalname.split(".");
+        if (limitMimetype.indexOf(type[1]) > -1) {
+            cb(null, false);
+        }else {
+            cb(null, true);
+        }
+    }
+});
+var fileType = fileUpload.fields([{name:'file', maxCount:10}]);
+
+/*var imageUpload = multer({
+    storage: storage,
+    limits:limits,
+    fileFilter:function(req, file, cb){
+        var type = file.mimetype.split("/");
+        if (type[0] == 'image') {
             cb(null, true);
         }else {
             cb(null, false);
         }
     }
 });
-var type = upload.fields([{name:'file', maxCount:5}, {name:'image', maxCount:5}]);
+var imageType = upload.fields([{name:'image', maxCount:5}]);*/
 
 // router setting
 function setRouter(app){
@@ -176,13 +199,13 @@ function setRouter(app){
     });
 
     // write_process
-    app.post('/board/:category/write_process', urlencodedParser, type, function(req, res){
+    app.post('/board/:category/write_process', urlencodedParser, fileType, function(req, res){
         var category = req.params.category;
         var data = req.body;
         var collection = boardSetting[category].collection;
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
-        
+
         if(req.files) data.files = req.files;
 
         authCheck(req, res, '/', setting.writeAuth, function() {
@@ -220,6 +243,7 @@ function setRouter(app){
             function renderView(commentData){
                 boardModel.findOne({_id: id}, function (err, data) {
                     data.hits++;
+
                     data.save(function (err) {
                         res.render('board/' + setting.render + '/view', {
                             user: req.cookies.member,
@@ -569,6 +593,23 @@ function setRouter(app){
             }
         });
     });
+
+    // download file
+    app.get('/board/download/:fileURI', function(req, res){
+        fs.readFile(path.join(__dirname,'..' ,'/public/uploads/') + req.params.fileURI, function (err, content) {
+            res.setHeader('Content-disposition', 'attachment; filename=' + req.params.fileURI);
+            res.end(content);
+        });
+    });
+
+    // editor image_upload
+    app.get('/popup/image_upload', function(req, res){
+        res.render('popup/image_upload', {user: req.cookies.member});
+    });
+
+    /*app.post('/popup/image_upload_process', urlencodedParser, type, function(req, res){
+
+    });*/
 };
 
 function authCheck(req, res, redirect, authNum, callback){

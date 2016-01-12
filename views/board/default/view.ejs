@@ -21,6 +21,24 @@
                 <span class="date"><% var date = data.createAt%><% include ../../partitials_util/date_format %></span></div>
             <div class="col-xs-4 col-sm-6 col-md-6 text-right">조회수 : <%=data.hits%></div>
         </div>
+        <%if(data.files[0] != null){%>
+        <div class="write-info row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <%
+                    var files = data.files[0].file;
+                    for(var i in files){
+                %>
+                <p>
+                    <span class="glyphicons glyphicons-floppy-disk"></span>
+                    <a href="/board/download/<%=files[i].filename%>">
+                        <%=files[i].filename%>
+                    </a>
+                    (<%=Math.round(files[i].size / 1000) %>KB)
+                </p>
+                <% } %>
+            </div>
+        </div>
+        <%}%>
         <div class="content row">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <span class="cont"><%=data.content%></span>

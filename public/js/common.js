@@ -48,6 +48,16 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             }
         });
 
+        // editor image upload
+        var $iframe = $('#ir1').next('iframe');
+        $iframe.one('load', function(e){
+            var $imageUploadBtn = $(e.currentTarget).contents().find('.se2_multy button');
+            $imageUploadBtn.bind('click', function(e){
+                winPopup('/popup/image_upload', 'popup', 400, 500);
+            });
+        });
+        $iframe = null;
+
         /***************************************** board delete form *****************************************/
         $('#delete-form').on('submit', function(e){
             if($(this).find('[name=password]').val().length < 4){
@@ -203,7 +213,6 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
                 return false;
             }
         });
-
     });
 }(jQuery));
 
@@ -230,4 +239,8 @@ function commentReply(commentId, depth){
     $commentReplyForm.children('form').attr('action', action);
     $commentReplyForm.children('form').attr('id', 'comment-reply-form');
     $('#' + commentId).after($commentReplyForm);
+}
+
+function winPopup(url, name, width, height){
+    window.open(url, name, 'width=' + width + ', height=' + height);
 }

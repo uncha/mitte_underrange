@@ -9,7 +9,8 @@ table td .comment-count{color:#d9534f;}
 #board-view .row{margin:0; padding:0 20px;}
 #board-view .subject{padding:16px 20px; border-top:2px solid #323232}
 #board-view .subject h4{margin:0; font-weight: bold}
-#board-view .write-info{padding:14px 20px; border-top:1px solid #bcc5d4; border-bottom: 1px solid #bcc5d4}
+#board-view .write-info{padding:14px 20px; border-top:1px solid #bcc5d4; border-bottom: 1px solid #bcc5d4; margin-top:-1px}
+#board-view .write-info p{margin:5px 0}
 #board-view .content{padding:14px 20px 40px 20px}
 #board-view .write-info .date{margin-left:10px; color:#b7b7b7; font-size: 13px}
 #board-view .write-info .writer{font-weight: bold;}
@@ -30,7 +31,6 @@ table td .comment-count{color:#d9534f;}
 #board-view .comment-group .comment-reply-data{display:none}
 #board-view .comment-group .parent-writer{font-size:11px; margin-right:8px}
 
-/*
-#board-view .comment-group .form-group{border-bottom:0; padding:0; margin:0}*/
+/*#board-view .comment-group .form-group{border-bottom:0; padding:0; margin:0}*/
 
 

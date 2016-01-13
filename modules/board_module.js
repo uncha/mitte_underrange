@@ -17,43 +17,48 @@ function boardModule(){
 // type : String, Number, Date, Buffer, Boolean, Mixed, ObjectId, Array
 var boardSchema = mongoose.Schema({
     // default field(수정 금지)
-    parent:{type:String},
-    ancestor:{type:String},
+    parent:String,
+    ancestor:String,
     step:{type:Number, default:0},
     depth:{type:Number, default:0},
-    subject:{type:String},
-    content:{type:String},
-    writer:{type:String},
-    password:{type:String},
+    subject:String,
+    content:String,
+    writer:String,
+    password:String,
     hits:{type:Number, default:0},
-    user_id:{type:String},
+    user_id:String,
     hidden:{type:Boolean, default:false},
-    files:{type:Array},
-    images:{type:Array},
     createAt:{type:Date, default:Date.now()},
     // add field
-    field1:{type:String} // email
+    field1:String, // email
+    file1:mongoose.Schema.Types.Mixed,
+    file2:mongoose.Schema.Types.Mixed,
+    image1:mongoose.Schema.Types.Mixed,
+    image2:mongoose.Schema.Types.Mixed,
+    image3:mongoose.Schema.Types.Mixed,
+    image4:mongoose.Schema.Types.Mixed,
+    image5:mongoose.Schema.Types.Mixed
 });
 
 var commentSchema = mongoose.Schema({
-    category:{type:String},
-    listId:{type:String},
-    parent:{type:String},
-    parent_writer:{type:String},
-    ancestor:{type:String},
+    category:String,
+    listId:String,
+    parent:String,
+    parent_writer:String,
+    ancestor:String,
     step:{type:Number, default:0},
     depth:{type:Number, default:0},
-    content:{type:String},
-    writer:{type:String},
-    password:{type:String},
-    user_id:{type:String},
+    content:String,
+    writer:String,
+    password:String,
+    user_id:String,
     hidden:{type:Boolean, default:false},
     createAt:{type:Date, default:Date.now()}
 });
 var commentModel = mongoose.model('comment', commentSchema);
 
 var tempImageSchema = mongoose.Schema({
-    fileURI:{type:String},
+    fileURI:String,
     createAt:{type:Date, default:Date.now()}
 });
 var tempImageModel = mongoose.model('tempImage', tempImageSchema);
@@ -95,9 +100,9 @@ var fileUpload = multer({
         }
     }
 });
-var fileType = fileUpload.fields([{name:'file', maxCount:10}]);
+var fileType = fileUpload.fields([{name:'file1', maxCount:1},{name:'file2', maxCount:1}]);
 
-/*var imageUpload = multer({
+var imageUpload = multer({
     storage: storage,
     limits:limits,
     fileFilter:function(req, file, cb){
@@ -109,7 +114,13 @@ var fileType = fileUpload.fields([{name:'file', maxCount:10}]);
         }
     }
 });
-var imageType = upload.fields([{name:'image', maxCount:5}]);*/
+var imageType = imageUpload.fields([
+    {name:'image1', maxCount:1},
+    {name:'image2', maxCount:1},
+    {name:'image3', maxCount:1},
+    {name:'image4', maxCount:1},
+    {name:'image5', maxCount:1}
+]);
 
 // router setting
 function setRouter(app){
@@ -206,7 +217,9 @@ function setRouter(app){
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
 
-        if(req.files) data.files = req.files;
+        for(var prop in req.files){
+            data[prop] = req.files[prop][0];
+        }
 
         authCheck(req, res, '/', setting.writeAuth, function() {
             boardModel.create(data, function(err, data) {
@@ -281,7 +294,7 @@ function setRouter(app){
     });
 
     // update_process
-    app.post('/board/:category/update_process/:id', urlencodedParser, function(req, res){
+    app.post('/board/:category/update_process/:id', urlencodedParser, fileType, function(req, res){
         var category = req.params.category;
         var id = req.params.id;
         var data = req.body;
@@ -303,8 +316,13 @@ function setRouter(app){
                         res.send(sendData);
                     }
                 } else {
-                    if (originData.password == data.password || req.cookies.member.boardAuth == 9) {
+                    if (originData.password == data.password || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
                         var updateData = utilModule.extend(originData, data);
+
+                        // TODO 파일 업로드 작업중
+                        for(var prop in req.files){
+                            data[prop] = req.files[prop][0];
+                        }
 
                         updateData.save(function (err) {
                             res.redirect('/board/' + category + '/view/' + id);
@@ -607,9 +625,10 @@ function setRouter(app){
         res.render('popup/image_upload', {user: req.cookies.member});
     });
 
-    /*app.post('/popup/image_upload_process', urlencodedParser, type, function(req, res){
-
-    });*/
+    app.post('/popup/image_upload_process', urlencodedParser, imageType, function(req, res){
+        console.log(req.files);
+        res.end();
+    });
 };
 
 function authCheck(req, res, redirect, authNum, callback){

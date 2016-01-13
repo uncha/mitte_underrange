@@ -53,7 +53,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
         $iframe.one('load', function(e){
             var $imageUploadBtn = $(e.currentTarget).contents().find('.se2_multy button');
             $imageUploadBtn.bind('click', function(e){
-                winPopup('/popup/image_upload', 'popup', 400, 500);
+                winPopup('/popup/image_upload', 'popup', 350, 450);
             });
         });
         $iframe = null;

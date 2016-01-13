@@ -21,19 +21,27 @@
                 <span class="date"><% var date = data.createAt%><% include ../../partitials_util/date_format %></span></div>
             <div class="col-xs-4 col-sm-6 col-md-6 text-right">조회수 : <%=data.hits%></div>
         </div>
-        <%if(data.files[0] != null){%>
+        <%if(data.file1 || data.file2){%>
         <div class="write-info row">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <%
-                    var files = data.files[0].file;
-                    for(var i in files){
+                if(data.file1){
                 %>
                 <p>
-                    <span class="glyphicons glyphicons-floppy-disk"></span>
-                    <a href="/board/download/<%=files[i].filename%>">
-                        <%=files[i].filename%>
+                    <a href="/board/download/<%=data.file1.filename%>">
+                        <%=data.file1.filename%>
                     </a>
-                    (<%=Math.round(files[i].size / 1000) %>KB)
+                    (<%=Math.round(data.file1.size / 1000) %>KB)
+                </p>
+                <% } %>
+                <%
+                if(data.file2){
+                %>
+                <p>
+                    <a href="/board/download/<%=data.file2.filename%>">
+                        <%=data.file2.filename%>
+                    </a>
+                    (<%=Math.round(data.file2.size / 1000) %>KB)
                 </p>
                 <% } %>
             </div>

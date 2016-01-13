@@ -1,4 +1,5 @@
 <% include ../../partitials/header %>
+<link rel="stylesheet" type="text/css" href="/css/board.css">
 <script type="text/javascript" src="/lib/se2/js/HuskyEZCreator.js" charset="utf-8"></script>
 </head>
 <body>
@@ -8,7 +9,7 @@
 var auth = (user)? user.boardAuth : 0;
 var user_id = (user) ? user.user_id : null;
 %>
-<form class="form-horizontal" id="write-form" method="POST" action="/board/<%=category%>/update_process/<%=data._id%>">
+<form class="form-horizontal" id="write-form" method="POST" action="/board/<%=category%>/update_process/<%=data._id%>"  enctype="multipart/form-data">
     <div class="form-group">
         <label class="col-sm-2 control-label">제목</label>
         <div class="col-sm-10">
@@ -39,6 +40,31 @@ var user_id = (user) ? user.user_id : null;
         </div>
     </div>
     <%}%>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">파일 업로드</label>
+        <div class="col-sm-10">
+            <input value="" style="width:300px" class="upload-file form-control" name="file1" type="file" placeholder="">
+            <%
+            if(data.file1){
+            %>
+            <input type="checkbox" name="file1-delete" />
+            <span class="upload-file">
+                <%=data.file1.filename%>
+                (<%=Math.round(data.file1.size / 1000) %>KB) 파일삭제
+            </span>
+            <%}%>
+            <input value="" style="width:300px" class="upload-file form-control" name="file2" type="file" placeholder="">
+            <%
+            if(data.file2){
+            %>
+            <input type="checkbox" name="file1-delete2" />
+            <span class="upload-file">
+                <%=data.file2.filename%>
+                (<%=Math.round(data.file2.size / 1000) %>KB) 파일삭제
+            </span>
+            <%}%>
+        </div>
+    </div>
     <div class="form-group">
         <label class="col-sm-2 control-label">내용</label>
         <div class="col-sm-10">

@@ -16,16 +16,20 @@ function sendAndBack(msg, url){
 }
 
 function extendSetting(obj, src) {
-    var obj2 = JSON.parse( JSON.stringify( obj ) );
+    var newObj = JSON.parse( JSON.stringify( obj ) );
     for (var key in src) {
-        if (src.hasOwnProperty(key)) obj2[key] = src[key];
+        if (src.hasOwnProperty(key)) newObj[key] = src[key];
     }
-    return obj2;
+    return newObj;
 }
 
-function extend(obj, src){
+function extend(obj, src) {
     for (var key in src) {
-        if (src.hasOwnProperty(key)) obj[key] = src[key];
+        if (hasOwnProperty(src, key)) obj[key] = src[key];
     }
     return obj;
+}
+
+function hasOwnProperty (obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop)
 }

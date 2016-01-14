@@ -23,6 +23,13 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
             // smart editor2 insert textarea content
             oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);
 
+            var $editorArea = $('#ir1').next('iframe').contents().find('#se2_iframe').contents().find('.se2_inputarea');
+            var imageVal = '';
+            $editorArea.find('img[filename]').each(function(){
+                imageVal += (imageVal) ? ',' + $(this).attr('filename') : $(this).attr('filename');
+            });
+            $('[name=images]').val(imageVal);
+
             if($(this).find('[name=subject]').val().length == 0){
                 alert('제목을 입력해 주세요.');
                 $(this).find('[name=subject]').focus();
@@ -53,7 +60,8 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
         $iframe.one('load', function(e){
             var $imageUploadBtn = $(e.currentTarget).contents().find('.se2_multy button');
             $imageUploadBtn.bind('click', function(e){
-                winPopup('/popup/image_upload', 'popup', 350, 450);
+                var tempKey = $('[name=tempKey]').val();
+                winPopup('/popup/image_upload/' + tempKey, 'tempImage', 350, 450);
             });
         });
         $iframe = null;
@@ -218,7 +226,7 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
 
 
 
-/***************************************** comment function *****************************************/
+/***************************************** common function *****************************************/
 
 // admin delete member func
 function deleteMember(id, page){
@@ -243,4 +251,13 @@ function commentReply(commentId, depth){
 
 function winPopup(url, name, width, height){
     window.open(url, name, 'width=' + width + ', height=' + height);
+}
+
+function tempImageSubmit(fileNames){
+    var files = fileNames.split(',');
+    for(var i in files){
+        var imageSrc = '/uploads/' + files[i];
+        var image = '<img filename="' + files[i] + '" src="' + imageSrc + '" /><br style="clear:both;" />';
+        $('#ir1').next('iframe').contents().find('#se2_iframe').contents().find('.se2_inputarea').append(image);
+    }
 }

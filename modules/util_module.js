@@ -1,10 +1,16 @@
+/*
+ * author uncha(kyutae21c@naver.com)
+ * board module v1.0.0
+ * lastest 2016.01.14
+ */
+
 module.exports = utilModule;
 module.exports.sendAndBack = sendAndBack;
 module.exports.extend = extend;
 module.exports.extendSetting = extendSetting;
-function utilModule(){
+module.exports.hasOwnProperty = hasOwnProperty;
 
-}
+function utilModule(){}
 
 function sendAndBack(msg, url){
     var sendData = '<script type="text/javascript">';

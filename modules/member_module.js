@@ -1,3 +1,9 @@
+/*
+ * author uncha(kyutae21c@naver.com)
+ * member module v0.1.0
+ * lastest 2016.01.14
+ */
+
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});

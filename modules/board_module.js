@@ -1,3 +1,9 @@
+/*
+ * author uncha(kyutae21c@naver.com)
+ * board module v0.1.0
+ * lastest 2016.01.14
+ */
+
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended:false});
@@ -33,11 +39,8 @@ var boardSchema = mongoose.Schema({
     field1:String, // email
     file1:mongoose.Schema.Types.Mixed,
     file2:mongoose.Schema.Types.Mixed,
-    image1:mongoose.Schema.Types.Mixed,
-    image2:mongoose.Schema.Types.Mixed,
-    image3:mongoose.Schema.Types.Mixed,
-    image4:mongoose.Schema.Types.Mixed,
-    image5:mongoose.Schema.Types.Mixed
+    images:Array,
+    tempkey:String
 });
 
 var commentSchema = mongoose.Schema({
@@ -58,7 +61,8 @@ var commentSchema = mongoose.Schema({
 var commentModel = mongoose.model('comment', commentSchema);
 
 var tempImageSchema = mongoose.Schema({
-    fileURI:String,
+    images:mongoose.Schema.Types.Mixed,
+    tempKey:String,
     createAt:{type:Date, default:Date.now()}
 });
 var tempImageModel = mongoose.model('tempImage', tempImageSchema);
@@ -115,11 +119,7 @@ var imageUpload = multer({
     }
 });
 var imageType = imageUpload.fields([
-    {name:'image1', maxCount:1},
-    {name:'image2', maxCount:1},
-    {name:'image3', maxCount:1},
-    {name:'image4', maxCount:1},
-    {name:'image5', maxCount:1}
+    {name:'image', maxCount:5}
 ]);
 
 // router setting
@@ -217,6 +217,7 @@ function setRouter(app){
         var setting = utilModule.extendSetting(boardSetting.default, boardSetting[category] || {});
         var boardModel = mongoose.model(collection, boardSchema);
 
+        // upload files
         for(var prop in req.files){
             data[prop] = req.files[prop][0];
         }
@@ -319,10 +320,31 @@ function setRouter(app){
                     if (originData.password == data.password || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
                         var updateData = utilModule.extend(originData, data);
 
-                        // TODO 파일 업로드 작업중
-                        for(var prop in req.files){
-                            data[prop] = req.files[prop][0];
+                        // file 업로드 처리
+                        // TODO 파일 삭제 처리가 static하여 변경해야함.
+                        if(data['file1-delete'] == 'on'){
+                            fs.unlink(path.join(__dirname,'..' , updateData.file1.path), function(err){
+                                console.log(err);
+                            });
+                            updateData.file1 = null;
                         }
+
+                        if(data['file2-delete'] == 'on'){
+                            fs.unlink(path.join(__dirname,'..' , updateData.file2.path), function(err){
+                                console.log(err);
+                            });
+                            updateData.file2 = null;
+                        }
+
+                        for(var prop in req.files){
+                            if(updateData[prop]) {
+                                fs.unlink(path.join(__dirname, '..', updateData[prop].path), function (err) {
+                                    console.log(err);
+                                });
+                            }
+                            updateData[prop] = req.files[prop][0];
+                        }
+                        // file 업로드 처리 끝
 
                         updateData.save(function (err) {
                             res.redirect('/board/' + category + '/view/' + id);
@@ -371,6 +393,20 @@ function setRouter(app){
                 if(originData.password == data.password){
                     boardModel.findOne({parent:id}, function(err, data){
                         if(!data) {
+                            // file 삭제 처리
+                            // TODO 파일 삭제 처리가 static하여 변경해야함.
+                            if(originData.file1){
+                                fs.unlink(path.join(__dirname,'..' , originData.file1.path), function(err){
+                                    console.log(err);
+                                });
+                            }
+
+                            if(originData.file2){
+                                fs.unlink(path.join(__dirname,'..' , originData.file2.path), function(err){
+                                    console.log(err);
+                                });
+                            }
+
                             boardModel.findByIdAndRemove(id, function (err) {
                                 var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
                                 res.send(sendData);
@@ -405,6 +441,20 @@ function setRouter(app){
             if (originData.user_id == req.cookies.member.user_id || (req.cookies.member && req.cookies.member.boardAuth == 9)) {
                 boardModel.findOne({parent:id}, function(err, data){
                     if(!data) {
+                        // file 삭제 처리
+                        // TODO 파일 삭제 처리가 static하여 변경해야함.
+                        if(originData.file1){
+                            fs.unlink(path.join(__dirname,'..' , originData.file1.path), function(err){
+                                console.log(err);
+                            });
+                        }
+
+                        if(originData.file2){
+                            fs.unlink(path.join(__dirname,'..' , originData.file2.path), function(err){
+                                console.log(err);
+                            });
+                        }
+
                         boardModel.findByIdAndRemove(id, function (err) {
                             var sendData = utilModule.sendAndBack('삭제하였습니다.', '/board/' + category + '/list');
                             res.send(sendData);
@@ -621,13 +671,31 @@ function setRouter(app){
     });
 
     // editor image_upload
-    app.get('/popup/image_upload', function(req, res){
-        res.render('popup/image_upload', {user: req.cookies.member});
+    app.get('/popup/image_upload/:key', function(req, res){
+        var key = req.params.key;
+        res.render('popup/image_upload', {user: req.cookies.member, key:key});
     });
 
-    app.post('/popup/image_upload_process', urlencodedParser, imageType, function(req, res){
-        console.log(req.files);
-        res.end();
+    app.post('/popup/image_upload_process/:key', urlencodedParser, imageType, function(req, res){
+        var data = req.body;
+        var fileNames = [];
+
+        data.tempKey = req.params.key;
+        data.images = req.files;
+
+        for(var i in req.files.image){
+            var fileName = req.files.image[i].filename;
+            fileNames.push(fileName);
+        }
+
+        tempImageModel.create(data, function(err, data){
+            var sendData = '<script type="text/javascript">';
+            sendData    += 'window.close();';
+            sendData    += 'window.opener.tempImageSubmit("' + fileNames + '");';
+            sendData    += '</script>';
+
+            res.send(sendData);
+        });
     });
 };
 

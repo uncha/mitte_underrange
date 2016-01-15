@@ -59,9 +59,10 @@ var regEmail=/^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[
         var $iframe = $('#ir1').next('iframe');
         $iframe.one('load', function(e){
             var $imageUploadBtn = $(e.currentTarget).contents().find('.se2_multy button');
+            var category = $('#write-form').attr('category');
             $imageUploadBtn.bind('click', function(e){
-                var tempKey = $('[name=tempKey]').val();
-                winPopup('/popup/image_upload/' + tempKey, 'tempImage', 350, 450);
+                var tempImageKey = $('[name=tempImageKey]').val();
+                winPopup('/board/' + category + '/popup/image_upload/' + tempImageKey, 'tempImage', 350, 450);
             });
         });
         $iframe = null;
@@ -256,8 +257,11 @@ function winPopup(url, name, width, height){
 function tempImageSubmit(fileNames){
     var files = fileNames.split(',');
     for(var i in files){
-        var imageSrc = '/uploads/' + files[i];
-        var image = '<img filename="' + files[i] + '" src="' + imageSrc + '" /><br style="clear:both;" />';
-        $('#ir1').next('iframe').contents().find('#se2_iframe').contents().find('.se2_inputarea').append(image);
+        var imgFormat = "\.(bmp|gif|jpg|jpeg|png)$";
+        if((new RegExp(imgFormat, "i")).test(files[i])){
+            var imageSrc = '/uploads/' + files[i];
+            var image = '<img filename="' + files[i] + '" src="' + imageSrc + '" /><br style="clear:both;" />';
+            $('#ir1').next('iframe').contents().find('#se2_iframe').contents().find('.se2_inputarea').append(image);
+        }
     }
 }

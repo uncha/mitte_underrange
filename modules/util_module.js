@@ -1,7 +1,7 @@
 /*
  * author uncha(kyutae21c@naver.com)
- * board module v1.0.0
- * lastest 2016.01.14
+ * board module v0.1.0
+ * lastest 2016.01.15
  */
 
 module.exports = utilModule;

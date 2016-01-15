@@ -14,7 +14,7 @@
 </head>
 <body>
 <h3>사진 첨부하기</h3>
-<form class="form-horizontal" id="image-upload-form" method="POST" action="/popup/image_upload_process/<%=key%>"  enctype="multipart/form-data">
+<form class="form-horizontal" id="image-upload-form" method="POST" action="/board/<%=category%>/popup/image_upload_process/<%=key%>"  enctype="multipart/form-data">
     <div class="form-group">
         <div class="col-sm-12">
             <input value="" style="width:300px" class="upload-file form-control" name="image" type="file" placeholder="">

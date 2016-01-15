@@ -1,7 +1,7 @@
 /*
  * author uncha(kyutae21c@naver.com)
  * board module v0.1.0
- * lastest 2016.01.14
+ * lastest 2016.01.15
  */
 
 var mongoose = require('mongoose');
@@ -12,6 +12,7 @@ var fs = require('fs');
 var path = require('path');
 var memberModule = require('./member_module');
 var utilModule = require('./util_module');
+var CronJob = require('cron').CronJob;
 
 module.exports = boardModule;
 module.exports.setRouter = setRouter;
@@ -40,7 +41,7 @@ var boardSchema = mongoose.Schema({
     file1:mongoose.Schema.Types.Mixed,
     file2:mongoose.Schema.Types.Mixed,
     images:Array,
-    tempkey:String
+    tempImageKey:String
 });
 
 var commentSchema = mongoose.Schema({
@@ -62,7 +63,8 @@ var commentModel = mongoose.model('comment', commentSchema);
 
 var tempImageSchema = mongoose.Schema({
     images:mongoose.Schema.Types.Mixed,
-    tempKey:String,
+    tempImageKey:String,
+    category:String,
     createAt:{type:Date, default:Date.now()}
 });
 var tempImageModel = mongoose.model('tempImage', tempImageSchema);
@@ -91,15 +93,14 @@ var storage = multer.diskStorage({
     }
 });
 var limits = { fileSize: 2 * 1024 * 1024 }; // 업로드 가능 파일 개당 2MB 제한
-var limitMimetype = ['html','htm','asp','aspx','php','jsp','cer','cdx','asa','php3','war','js','css','java'];
 var fileUpload = multer({
     storage: storage,
     limits:limits,
     fileFilter:function(req, file, cb){
-        var type = file.originalname.split(".");
-        if (limitMimetype.indexOf(type[1]) > -1) {
+        var limitFormat = "\.(html|htm|asp|aspx|php|jsp|cer|cdx|asa|php3|war|js|css|java)$";
+        if((new RegExp(limitFormat, "i")).test(file.originalname)){
             cb(null, false);
-        }else {
+        } else {
             cb(null, true);
         }
     }
@@ -121,6 +122,11 @@ var imageUpload = multer({
 var imageType = imageUpload.fields([
     {name:'image', maxCount:5}
 ]);
+
+// Cron Job every Day temp Images delete not board data
+var job = new CronJob('00 00 04 * * *', function() {
+
+}, null, true);
 
 // router setting
 function setRouter(app){
@@ -671,17 +677,20 @@ function setRouter(app){
     });
 
     // editor image_upload
-    app.get('/popup/image_upload/:key', function(req, res){
+    app.get('/board/:category/popup/image_upload/:key', function(req, res){
         var key = req.params.key;
-        res.render('popup/image_upload', {user: req.cookies.member, key:key});
+        var category = req.params.category;
+        res.render('popup/image_upload', {user: req.cookies.member, category:category, key:key});
     });
 
-    app.post('/popup/image_upload_process/:key', urlencodedParser, imageType, function(req, res){
+    app.post('/board/:category/popup/image_upload_process/:key', urlencodedParser, imageType, function(req, res){
         var data = req.body;
+        var category = req.params.category;
         var fileNames = [];
 
-        data.tempKey = req.params.key;
+        data.tempImageKey = req.params.key;
         data.images = req.files;
+        data.category = category;
 
         for(var i in req.files.image){
             var fileName = req.files.image[i].filename;

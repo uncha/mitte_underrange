@@ -20,6 +20,7 @@
     "body-parser": "^1.14.2",
     "bootstrap": "^3.3.6",
     "cookie-parser": "^1.4.0",
+    "cron": "^1.1.0",
     "ejs": "^2.3.4",
     "express": "^4.13.3",
     "jquery": "^2.1.4",

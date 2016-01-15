@@ -11,7 +11,7 @@
         <col style="width:70px"/>
         <col />
         <col style="width:120px" />
-        <col style="width:60px" />
+        <col style="width:120px" />
         <col style="width:120px" />
     </colgroup>
     <thead>
@@ -86,7 +86,7 @@
 
         <%
         if(prevPageGroupNum > 0){
-            var prevPage = prevPageGroupNum * pageSize - pageSize + 1;
+            var prevPage = prevPageGroupNum * pageSize;
         %>
         <li><a href="/board/<%=category%>/list/1<% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="first"><span aria-hidden="true">&laquo;</span></a></li>
         <li><a href="/board/<%=category%>/list/<%=prevPage%><% if(searchValue){%>?searchType=<%=searchType%>&searchValue=<%=searchValue%><%}%>" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a></li>

@@ -25,31 +25,6 @@ app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '_' + file.originalname);
-    }
-});
-
-var limits = { fileSize: 2 * 1024 * 1024 }; // 2MB
-var upload = multer({
-    storage: storage,
-    limits:limits,
-    fileFilter:function(req, file, cb){
-        var type = file.mimetype;
-        var typeArray = type.split("/");
-        if (typeArray[0] == "video" || typeArray[0] == "image") {
-            cb(null, true);
-        }else {
-            cb(null, false);
-        }
-    }
-});
-var type = upload.single('uploadFile');
-
 /*************************** router *******************************/
 // root
 app.get('/', function(req, res){
@@ -59,22 +34,6 @@ app.get('/', function(req, res){
 // 회사소개
 app.get('/company/introduce', function(req, res){
     res.render('company/introduce', {user:req.cookies.member});
-});
-
-app.get('/upload', function(req, res){
-    res.render('upload');
-});
-
-app.post('/upload', type, function (req, res, next) {
-    if(req.file){
-        res.send('<script>alert("업로드성공!"); location.href="/upload";</script>')
-    } else {
-        res.send('<script>alert("업로드실패!"); location.href="/upload";</script>')
-    }
-});
-
-app.get('/se2', function(req, res){
-    res.render('se2');
 });
 
 memberModule.setRouter(app);
